@@ -85,6 +85,7 @@
   .tap{border-radius:24px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.01em;padding:18px 8px;transition:transform .12s cubic-bezier(.2,.9,.3,1),background .15s ease;position:relative;overflow:hidden}
   .tap:active{transform:scale(.955)}
   .tap small{font-family:var(--body);font-size:10.5px;font-weight:500;color:var(--dim);letter-spacing:.02em;margin-top:-3px}
+  .tap small.upnext{font-weight:800;color:currentColor}
   .tap .glyph{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
   .tap .glyph svg{width:100%;height:100%}
   .tap.on-left{background:var(--left-soft);color:var(--left)}
@@ -112,7 +113,22 @@
   .mk.nappy{top:19px;height:8px;width:4px}
   .legend{display:flex;justify-content:space-between;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:5px;font-weight:600}
 
-  .dsep{margin:26px 0 10px 6px;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);font-weight:700}
+  .dgroup{margin-top:14px}
+  .dgroup:first-of-type{margin-top:20px}
+  .dhead{width:100%;display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);text-align:left;transition:border-radius .05s ease}
+  .dhead:active{background:var(--card2)}
+  .dhead.open{border-radius:16px 16px 0 0;box-shadow:none}
+  .dname{font-family:var(--display);font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+  .dsum{margin-left:auto;font-size:11.5px;color:var(--dim);font-weight:600}
+  .dchev{width:18px;height:18px;stroke:var(--dim);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;transition:transform .22s ease}
+  .dhead.open .dchev{transform:rotate(180deg)}
+  .dbody .card{border-radius:0 0 16px 16px;box-shadow:var(--shadow)}
+  .dbody[hidden]{display:none}
+  .dgroup.earlier{margin-top:14px}
+  .earlier > .dhead .dname{color:var(--dim)}
+  .ebody{padding-left:0}
+  .ebody .dgroup{margin-top:10px}
+  .ebody .dgroup:first-child{margin-top:14px}
   .card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
   .item{display:flex;align-items:center;gap:13px;padding:14px 16px;position:relative}
   .item + .item::before{content:"";position:absolute;left:63px;right:0;top:0;height:1px;background:var(--line)}
@@ -264,6 +280,7 @@
 const KEY = 'baby-tracker-v1';
 let S = { events: [], active: null, name: '', theme: 'auto' };
 let lastDeleted = null, toastTimer = null, pendingPhoto = null, viewing = null;
+const openDays = {};   // day-key -> bool; which log days are expanded (session only)
 const $ = id => document.getElementById(id);
 
 /* ===== storage: Claude's store when it exists, the browser's otherwise ===== */
@@ -724,6 +741,28 @@ $('edSave').onclick = saveEditor;
 $('edDelete').onclick = deleteFromEditor;
 $('edKind').querySelectorAll('button').forEach(b => b.onclick = () => setKind(b.dataset.k));
 
+function toggleDay(key){
+  const groups = document.querySelectorAll('.dgroup');
+  groups.forEach(g => {
+    const head = g.querySelector('.dhead');
+    if(!head || head.getAttribute('onclick') !== 'toggleDay(' + key + ')') return;
+    const body = head.nextElementSibling;              // this group's own body
+    const nowOpen = body.hasAttribute('hidden');
+    if(nowOpen){ body.removeAttribute('hidden'); head.classList.add('open'); }
+    else { body.setAttribute('hidden', ''); head.classList.remove('open'); }
+    openDays[key] = nowOpen;
+  });
+}
+function toggleEarlier(){
+  const g = document.querySelector('.dgroup.earlier');
+  if(!g) return;
+  const head = g.querySelector('.dhead'), body = g.querySelector('.ebody');
+  const nowOpen = body.hasAttribute('hidden');
+  if(nowOpen){ body.removeAttribute('hidden'); head.classList.add('open'); }
+  else { body.setAttribute('hidden', ''); head.classList.remove('open'); }
+  openDays.earlier = nowOpen;
+}
+
 /* ===== ring ===== */
 const R = 92, C = 2 * Math.PI * R;
 function currentArcs(now){
@@ -833,7 +872,7 @@ function render(){
   const hint = side => {
     if(live === side) return S.active.paused ? '<small>paused here</small>' : '<small>feeding now</small>';
     if(S.active) return '<small>switch here</small>';
-    if(next === side) return '<small>up next</small>';
+    if(next === side) return '<small class="upnext">up next</small>';
     return '';
   };
   const sideBtn = side => `<button class="tap on-${side}${live===side?' live':''}" onclick="startFeed('${side}')">
@@ -882,21 +921,23 @@ function render(){
     h += `<div class="empty"><b>Nothing logged yet</b>
       <span>Start a feed above, or tap a nappy when you change one.</span></div>`;
   } else {
-    let day = null;
-    sorted.slice(0,120).forEach(e => {
-      const d = dayName(at(e));
-      if(d !== day){
-        if(day !== null) h += '</div>';
-        day = d;
-        h += `<div class="dsep">${d}</div><div class="card">`;
-      }
+    // group into days, newest first
+    const days = [];
+    let cur = null;
+    sorted.forEach(e => {
+      const label = dayName(at(e));
+      if(!cur || cur.label !== label){ cur = { label, key: startOfDay(at(e)), events: [] }; days.push(cur); }
+      cur.events.push(e);
+    });
+
+    const rowHTML = e => {
       const meta = e.kind==='feed' ? FEED[e.segments[0].side] : NAPPY[e.what];
       const icon = e.kind==='feed' ? ICON[e.segments[0].side] : ICON[NAPPY[e.what].icon];
       const title = e.kind==='feed'
         ? feedTitle(e.segments) + ' · ' + ago(sumSegs(e.segments))
         : NAPPY[e.what].name + ' nappy';
       const sub = e.kind==='feed' ? chips(e.segments) : clock(e.ts);
-      h += `<div class="item" onclick="openEditor('${e.id}')">
+      return `<div class="item" onclick="openEditor('${e.id}')">
         <div class="pip" style="background:var(${meta.soft});color:var(${meta.v})">${icon}</div>
         <div class="body"><b>${title}</b>${e.kind==='feed'
           ? `<span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">${sub}</span>`
@@ -904,8 +945,56 @@ function render(){
         ${e.photo ? `<img class="thumb" data-photo="${e.id}" onclick="event.stopPropagation();openPhoto('${e.id}')" alt="Photo">` : ''}
         <button class="x" onclick="event.stopPropagation();remove('${e.id}')" aria-label="Delete entry">&times;</button>
       </div>`;
-    });
-    h += '</div>';
+    };
+
+    // day-header HTML for one day bucket
+    const dayHTML = dy => {
+      const f = dy.events.filter(e => e.kind==='feed').length;
+      const wt = dy.events.filter(e => e.kind==='nappy' && e.what!=='dirty').length;
+      const dr = dy.events.filter(e => e.kind==='nappy' && e.what!=='wet').length;
+      const bits = [];
+      if(f) bits.push(f + (f===1?' feed':' feeds'));
+      if(wt) bits.push(wt + ' wet');
+      if(dr) bits.push(dr + ' dirty');
+      const summary = bits.join(' · ') || 'no entries';
+      const isToday = dy.label === 'Today';
+      const open = openDays[dy.key] !== undefined ? openDays[dy.key] : isToday;
+      return `<div class="dgroup">
+        <button class="dhead${open?' open':''}" onclick="toggleDay(${dy.key})">
+          <span class="dname">${dy.label}</span>
+          <span class="dsum">${summary}</span>
+          <svg class="dchev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dbody"${open?'':' hidden'}>
+          <div class="card">${dy.events.map(rowHTML).join('')}</div>
+        </div>
+      </div>`;
+    };
+
+    // last 7 days show as their own rows; everything older folds into "Earlier"
+    const cutoff = startOfDay(now) - 6*DAY;     // today + previous 6 = 7 days
+    const recent = days.filter(dy => dy.key >= cutoff);
+    const older = days.filter(dy => dy.key < cutoff);
+
+    recent.forEach(dy => { h += dayHTML(dy); });
+
+    if(older.length){
+      const oOpen = openDays.earlier === true;   // "Earlier" defaults closed
+      const oFeeds = older.reduce((s,dy) => s + dy.events.filter(e => e.kind==='feed').length, 0);
+      const oNaps = older.reduce((s,dy) => s + dy.events.filter(e => e.kind==='nappy').length, 0);
+      const span = older.length;
+      const esum = `${span} more day${span===1?'':'s'} · ${oFeeds} feed${oFeeds===1?'':'s'}, ${oNaps} napp${oNaps===1?'y':'ies'}`;
+      h += `<div class="dgroup earlier">
+        <button class="dhead${oOpen?' open':''}" onclick="toggleEarlier()">
+          <span class="dname">Earlier</span>
+          <span class="dsum">${esum}</span>
+          <svg class="dchev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dbody ebody"${oOpen?'':' hidden'}>
+          ${older.map(dayHTML).join('')}
+        </div>
+      </div>`;
+    }
   }
   h += `<div class="addrow"><button class="addbtn" onclick="openEditor()">
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a past entry</button></div>`;
@@ -914,7 +1003,6 @@ function render(){
   <div class="tools">
     <button class="tool" onclick="exportCSV()">Export CSV</button>
     <button class="tool" onclick="importCSV()">Import CSV</button>
-    <button class="tool" onclick="backup()">Save backup</button>
     <button class="tool" onclick="wipe()">Clear all data</button>
   </div>
   <div class="foot">${linked()
@@ -1052,11 +1140,6 @@ $('csvFile').addEventListener('change', async function(){
   flash('Added ' + fresh.length + ' from CSV');
 });
 
-function backup(){
-  const text = JSON.stringify(S);
-  if(download('feeds-backup-' + stamp() + '.json', text, 'application/json')) flash('Saved feeds-backup-' + stamp() + '.json');
-  else openSheet({ icon:'copy', title:'Your backup', sub:'Select all and copy.', area:{ value:text, readOnly:true }, ok:'Done', cancel:'Close' });
-}
 async function wipe(){
   const yes = await confirmSheet('Clear everything?',
     'Every feed, nappy and photo. This cannot be undone.', 'Delete it all');
