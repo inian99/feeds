@@ -16,9 +16,9 @@
   :root{
     --bg:#17141F; --bg2:#211B2D; --card:#252030; --card2:#2E2839; --line:#3A3348;
     --text:#F6F0E8; --dim:#A79FB8;
-    --left:#F5B85C; --right:#6FCBB8; --bottle:#A99BF0; --wet:#E8D57A; --dirty:#CE9159;
+    --left:#F5B85C; --right:#6FCBB8; --bottle:#A99BF0; --wet:#6BA8E8; --dirty:#CE9159; --food:#E58C8C;
     --left-soft:rgba(245,184,92,.15); --right-soft:rgba(111,203,184,.15);
-    --bottle-soft:rgba(169,155,240,.15); --wet-soft:rgba(232,213,122,.13); --dirty-soft:rgba(206,145,89,.13);
+    --bottle-soft:rgba(169,155,240,.15); --wet-soft:rgba(107,168,232,.14); --dirty-soft:rgba(206,145,89,.13); --food-soft:rgba(229,140,140,.14); --daytime:rgba(245,200,110,.10); --nighttime:rgba(90,110,180,.16);
     --danger:#F08A8A; --danger-soft:rgba(240,138,138,.14);
     --track:rgba(255,255,255,.07); --shadow:0 14px 34px rgba(0,0,0,.38); --press:rgba(255,255,255,.05);
     --display:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;
@@ -29,9 +29,9 @@
     --pick:invert(.35);
     --bg:#F3F6F2; --bg2:#EAEFE9; --card:#FFFFFF; --card2:#F5F8F4; --line:#E0E6DF;
     --text:#242032; --dim:#7B7A8B;
-    --left:#C07F1E; --right:#1E8B78; --bottle:#6659CB; --wet:#A38C1C; --dirty:#A2622C;
+    --left:#C07F1E; --right:#1E8B78; --bottle:#6659CB; --wet:#2E6DB0; --dirty:#A2622C; --food:#C1554F;
     --left-soft:rgba(192,127,30,.11); --right-soft:rgba(30,139,120,.11);
-    --bottle-soft:rgba(102,89,203,.10); --wet-soft:rgba(163,140,28,.10); --dirty-soft:rgba(162,98,44,.10);
+    --bottle-soft:rgba(102,89,203,.10); --wet-soft:rgba(46,109,176,.10); --dirty-soft:rgba(162,98,44,.10); --food-soft:rgba(193,85,79,.10); --daytime:rgba(245,200,110,.14); --nighttime:rgba(70,90,150,.10);
     --danger:#C7443F; --danger-soft:rgba(199,68,63,.10);
     --track:rgba(36,32,50,.08); --shadow:0 10px 26px rgba(36,32,50,.08); --press:rgba(36,32,50,.04);
   }
@@ -91,12 +91,23 @@
   .tap.on-left{background:var(--left-soft);color:var(--left)}
   .tap.on-right{background:var(--right-soft);color:var(--right)}
   .tap.on-bottle{background:var(--bottle-soft);color:var(--bottle)}
-  .tap.wet{color:var(--wet)} .tap.dirty,.tap.both{color:var(--dirty)}
+  .tap.wet{color:var(--wet)} .tap.dirty{color:var(--dirty)} .tap.both{color:var(--text)}
   .tap.live::before{content:"";position:absolute;inset:0;border-radius:24px;border:2px solid currentColor;opacity:.55}
   .tap.bottle{flex-direction:row;gap:10px;padding:15px 8px;font-size:16px}
   .tap.bottle .glyph{width:22px;height:22px}
   .tap.nap{padding:16px 6px;font-size:15.5px;gap:5px}
   .tap.nap .glyph{width:26px;height:26px}
+  .desttoggle{display:flex;gap:4px;background:var(--card2);border-radius:14px;padding:4px;margin-bottom:10px}
+  .desttoggle button{flex:1;height:38px;border-radius:11px;font-family:var(--display);font-size:13.5px;font-weight:700;color:var(--dim);border:1.5px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease}
+  .desttoggle button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow);border-color:var(--text)}
+  .desttoggle button:active{opacity:.8}
+  .food-btn .glyph{color:var(--food)}
+  .badge{display:inline-block;font-family:var(--body);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--food);background:var(--food-soft);border-radius:6px;padding:2px 6px;vertical-align:middle;margin-left:2px}
+  .note{display:block;margin-top:5px;font-size:12.5px;color:var(--text);opacity:.82;line-height:1.4;font-style:italic}
+  .notebtn{width:30px;height:30px;border-radius:50%;flex:none;font-size:19px;line-height:1;color:var(--dim);background:var(--card2);display:flex;align-items:center;justify-content:center}
+  .notebtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .notebtn.has{color:var(--text)}
+  .notebtn:active{opacity:.7}
 
   .today{margin-top:24px;background:var(--card);border-radius:24px;padding:18px 8px;box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(4,1fr)}
   .cell{text-align:center;position:relative}
@@ -166,6 +177,9 @@
   .sheet h2{font-family:var(--display);font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em}
   .sheet .at{margin-top:7px;font-size:14px;color:var(--dim);line-height:1.5}
   .field{width:100%;margin-top:18px;background:var(--card2);border:1px solid var(--line);border-radius:18px;padding:15px 16px;font-family:var(--display);font-size:17px;font-weight:600;color:var(--text);text-align:center;-webkit-user-select:text;user-select:text;outline:none}
+  .fieldwrap{position:relative;margin-top:18px}
+  .fieldwrap .field{margin-top:0}
+  .fieldwrap .suffix{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-family:var(--display);font-size:15px;font-weight:600;color:var(--dim);pointer-events:none}
   .field::placeholder{color:var(--dim);font-weight:500}
   textarea.field{font-family:var(--body);font-size:12px;font-weight:400;text-align:left;height:118px;resize:none;line-height:1.5}
   .shot{margin-top:18px;width:100%;height:168px;border-radius:20px;object-fit:cover;display:none}
@@ -176,6 +190,44 @@
   .sa.danger{background:var(--danger);color:#fff}
   .sa:active{transform:scale(.97)}
 
+  .chartview{position:fixed;inset:0;background:rgba(8,6,14,.55);display:none;align-items:center;justify-content:center;z-index:31;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom))}
+  .chartview.up{display:flex}
+  .chcard{width:100%;max-width:460px;max-height:100%;overflow-y:auto;background:linear-gradient(178deg,var(--bg) 0%,var(--bg2) 100%);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.4);padding:18px 18px 20px;display:flex;flex-direction:column}
+  .chhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .chtitle{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:-.02em}
+  .chclose{width:34px;height:34px;border-radius:50%;background:var(--card);font-size:20px;line-height:1;color:var(--dim);box-shadow:var(--shadow);flex:none}
+  .chclose:active{background:var(--card2)}
+  .chrange{display:flex;gap:5px;background:var(--card2);border-radius:14px;padding:4px;margin-bottom:14px}
+  .chrange button{flex:1;height:36px;border-radius:11px;font-family:var(--display);font-size:12px;font-weight:700;color:var(--dim);border:1.5px solid transparent;transition:background .15s,color .15s,border-color .15s}
+  .chrange button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow);border-color:var(--text)}
+  .chstats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-radius:18px;padding:13px 8px;box-shadow:var(--shadow);margin-bottom:14px}
+  .chstats .cell{text-align:center}
+  .chstats .cell .n{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.02em}
+  .chstats .cell .n i{font-style:normal;font-size:11px;font-weight:600;color:var(--dim);margin-left:1px}
+  .chstats .cell .k{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px;font-weight:600}
+  .chscroll{height:250px;flex:none;display:flex;background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+  .chaxis{flex:none;width:32px;display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--card)}
+  .chaxis .axplot{position:relative;flex:1;min-height:0}
+  .chaxis .axfoot{flex:none;height:30px}
+  .chaxis .tl{position:absolute;right:4px;font-size:8.5px;font-weight:600;color:var(--dim);transform:translateY(-50%);letter-spacing:.01em;white-space:nowrap}
+  .chtrack{flex:1;overflow-x:auto;overflow-y:hidden;display:flex;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+  .chcol{flex:none;position:relative;border-right:1px solid var(--line);display:flex;flex-direction:column}
+  .chcol:last-child{border-right:none}
+  .chplot{position:relative;flex:1;min-height:0;overflow:visible}
+  .chcol .daybg{position:absolute;left:0;right:0;top:0;height:50%;background:var(--daytime)}
+  .chcol .nightbg{position:absolute;left:0;right:0;bottom:0;height:50%;background:var(--nighttime)}
+  .chcol .noon{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line);opacity:.7}
+  .chcol .dot{position:absolute;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 1.5px var(--card);z-index:2}
+  .chcol .dlabel{flex:none;height:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:9px;line-height:1.25;font-weight:700;color:var(--dim);border-top:1px solid var(--line)}
+  .chcol.today .dlabel{color:var(--text)}
+  .chcol.today .chplot{background:rgba(255,255,255,.03)}
+  .chcol .dcount{position:absolute;top:2px;left:0;right:0;text-align:center;font-size:8.5px;font-weight:700;color:var(--dim);opacity:.7;z-index:2}
+  .chlegend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--dim);font-weight:600}
+  .chlegend span{display:flex;align-items:center;gap:6px}
+  .chlegend i{width:9px;height:9px;border-radius:50%;flex:none}
+  .chlegend .chband i{border-radius:3px;width:12px;height:9px;border:1px solid var(--line)}
+  .chlegend .daysw{background:var(--daytime)}
+  .chlegend .nightsw{background:var(--nighttime)}
   .viewer{position:fixed;inset:0;background:#0C0A12;display:none;flex-direction:column;z-index:30;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom))}
   .viewer.up{display:flex}
   .viewer img{flex:1;min-height:0;width:100%;object-fit:contain;border-radius:20px}
@@ -197,12 +249,31 @@
   .seg button.sel{color:#fff}
   .seg button.sel.k-left{background:var(--left)} .seg button.sel.k-right{background:var(--right)}
   .seg button.sel.k-bottle{background:var(--bottle)} .seg button.sel.k-wet{background:var(--wet)}
-  .seg button.sel.k-dirty,.seg button.sel.k-both{background:var(--dirty)}
+  .seg button.sel.k-dirty{background:var(--dirty)}
+  .seg button.sel.k-both{background:linear-gradient(105deg,var(--wet) 0 50%,var(--dirty) 50% 100%)}
+  .seg button.sel.k-food{background:var(--food)}
   #edFeed,#edNappy{display:none}
+  #edSegs{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .segrow{display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:14px;padding:9px 10px}
+  .segdot{width:9px;height:9px;border-radius:50%;flex:none}
+  .segname{font-family:var(--display);font-weight:700;font-size:13.5px;width:44px;flex:none}
+  .segtime{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 8px;font-family:var(--display);font-size:14px;font-weight:600;color:var(--text);text-align:center;-webkit-appearance:none;appearance:none;outline:none}
+  .segtime::-webkit-date-and-time-value{text-align:center}
+  .segtime::-webkit-calendar-picker-indicator{filter:var(--pick,invert(.6));width:14px}
+  .segdash{color:var(--dim);flex:none}
+  .segx{width:26px;height:26px;border-radius:50%;flex:none;font-size:16px;line-height:1;color:var(--dim);background:var(--card)}
+  .segx:active{background:var(--line)}
+  .segx-sp{width:26px;flex:none}
+  .segadd{display:flex;gap:7px;margin-top:10px}
+  .segadd button{flex:1;height:40px;border-radius:12px;background:var(--card2);border:1.5px dashed var(--line);font-family:var(--display);font-size:13px;font-weight:700;color:var(--dim)}
+  .segadd button:active{background:var(--card);color:var(--text)}
   .addrow{margin:14px 0 0;display:flex;justify-content:center}
   .addbtn{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:650;color:var(--dim);background:var(--card);border-radius:15px;padding:11px 18px;box-shadow:var(--shadow)}
   .addbtn:active{background:var(--card2)}
   .addbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  .histbtn{width:100%;margin-top:14px;height:52px;border-radius:17px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:9px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--text)}
+  .histbtn:active{background:var(--card2)}
+  .histbtn svg{width:19px;height:19px;stroke:var(--left);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .item{cursor:pointer}
   .toast{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));max-width:488px;margin:0 auto;background:var(--text);color:var(--bg);border-radius:19px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:14px;font-weight:600;box-shadow:0 16px 40px rgba(0,0,0,.4);transform:translateY(190%);transition:transform .32s cubic-bezier(.22,1,.3,1);z-index:40}
   .toast.up{transform:translateY(0)}
@@ -219,7 +290,7 @@
   <div class="halo" id="sheetHalo"></div>
   <h2 id="sheetTitle"></h2>
   <div class="at" id="sheetAt"></div>
-  <input class="field" id="sheetInput" maxlength="24">
+  <div class="fieldwrap" id="sheetInputWrap"><input class="field" id="sheetInput" maxlength="24"><span class="suffix" id="sheetSuffix"></span></div>
   <textarea class="field" id="sheetArea" spellcheck="false"></textarea>
   <img class="shot" id="shot" alt="Photo for this entry">
   <div class="sacts">
@@ -241,13 +312,17 @@
     <button data-k="left">Left</button><button data-k="right">Right</button>
     <button data-k="bottle">Bottle</button><button data-k="wet">Wet</button>
     <button data-k="dirty">Dirty</button><button data-k="both">Both</button>
+    <button data-k="food">Food</button>
   </div>
   <div id="edFeed">
     <label class="flab">Date</label>
     <input class="field ed" id="edDate" type="date">
-    <div class="two-col">
-      <div><label class="flab">Started</label><input class="field ed" id="edStart" type="time"></div>
-      <div><label class="flab">Ended</label><input class="field ed" id="edEnd" type="time"></div>
+    <label class="flab" style="margin-top:16px">Feed segments</label>
+    <div id="edSegs"></div>
+    <div class="segadd">
+      <button type="button" data-add="left">+ Left</button>
+      <button type="button" data-add="right">+ Right</button>
+      <button type="button" data-add="bottle">+ Bottle</button>
     </div>
     <div class="hint" id="edFeedHint"></div>
   </div>
@@ -271,6 +346,27 @@
   <div class="vrow">
     <button class="sa" onclick="deleteViewedPhoto()">Delete photo</button>
     <button class="sa primary" onclick="closeViewer()">Done</button>
+  </div>
+</div>
+
+<div class="chartview" id="chartview" onclick="if(event.target===this)closeChart()">
+  <div class="chcard">
+    <div class="chhead">
+      <div class="chtitle">Feed history</div>
+      <button class="chclose" onclick="closeChart()" aria-label="Close">&times;</button>
+    </div>
+    <div class="chrange" id="chRange">
+      <button data-d="1">1 day</button>
+      <button data-d="7" class="on">7 days</button>
+      <button data-d="14">2 weeks</button>
+      <button data-d="28">4 weeks</button>
+    </div>
+    <div class="chstats" id="chStats"></div>
+    <div class="chscroll" id="chScroll">
+      <div class="chaxis" id="chAxis"></div>
+      <div class="chtrack" id="chTrack"></div>
+    </div>
+    <div class="chlegend" id="chLegend"></div>
   </div>
 </div>
 
@@ -356,11 +452,13 @@ const ICON = {
   bottle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4l-1 3.2c1.9.8 3 2.5 3 4.5V19a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3V9.7c0-2 1.1-3.7 3-4.5L10 2Z"/><path d="M8 12h8"/></svg>',
   wet:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2s6 6.3 6 10.1a6 6 0 0 1-12 0C6 9.5 12 3.2 12 3.2Z"/></svg>',
   dirty: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 20h11a3.5 3.5 0 0 0 .6-6.9 4.2 4.2 0 0 0-4-4.8A4.6 4.6 0 0 0 6 10.2 3.6 3.6 0 0 0 6.5 20Z"/></svg>',
-  both:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 21h9a3 3 0 0 0 .5-6 3.6 3.6 0 0 0-3.4-4.1A4 4 0 0 0 7 12a3.1 3.1 0 0 0 .5 9Z"/><path d="M17.5 2.5s2.5 2.9 2.5 4.6a2.5 2.5 0 1 1-5 0c0-1.7 2.5-4.6 2.5-4.6Z"/></svg>',
+  both:  '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 21h9a3 3 0 0 0 .5-6 3.6 3.6 0 0 0-3.4-4.1A4 4 0 0 0 7 12a3.1 3.1 0 0 0 .5 9Z" stroke="var(--dirty)"/><path d="M17.5 2.5s2.5 2.9 2.5 4.6a2.5 2.5 0 1 1-5 0c0-1.7 2.5-4.6 2.5-4.6Z" stroke="var(--wet)"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>',
   tag:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z"/></svg>',
   copy:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-6A3.5 3.5 0 0 0 3 6.5v6A2.5 2.5 0 0 0 5.5 15"/></svg>',
   cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19h10.5a3.5 3.5 0 0 0 .4-7A5.5 5.5 0 0 0 7.3 10 4.5 4.5 0 0 0 7 19Z"/><path d="M12 15.5v-5M9.8 12.6 12 10.4l2.2 2.2"/></svg>',
+  food:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 2 2v9M8 3v6M4 3v6M18 3c-1.7 0-3 2.2-3 5s1.3 4 3 4v9"/></svg>',
+  note:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2 2 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>',
   moon:  '<svg viewBox="0 0 24 24"><path d="M20 14.5A8.2 8.2 0 0 1 9.5 4 8.3 8.3 0 1 0 20 14.5Z"/></svg>',
   sun:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2M12 19.6v2M2.4 12h2M19.6 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>'
 };
@@ -399,6 +497,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':
 
 const FEED = { left:{name:'Left', short:'L', v:'--left', soft:'--left-soft'}, right:{name:'Right', short:'R', v:'--right', soft:'--right-soft'}, bottle:{name:'Bottle', short:'B', v:'--bottle', soft:'--bottle-soft'} };
 const NAPPY = { wet:{name:'Wet', icon:'wet', v:'--wet', soft:'--wet-soft'}, dirty:{name:'Dirty', icon:'dirty', v:'--dirty', soft:'--dirty-soft'}, both:{name:'Wet + dirty', icon:'both', v:'--dirty', soft:'--dirty-soft'} };
+const FOODMETA = { name:'Food', icon:'food', v:'--food', soft:'--food-soft' };
 
 /* ===== sheet: one dialog, several shapes ===== */
 let sheetResolve = null;
@@ -416,8 +515,16 @@ function openSheet(o){
     $('sheetAt').innerHTML = o.sub || '';
     $('sheetAt').style.display = o.sub ? 'block' : 'none';
     const inp = $('sheetInput');
-    inp.style.display = o.input ? 'block' : 'none';
-    if(o.input){ inp.value = o.input.value || ''; inp.placeholder = o.input.placeholder || ''; }
+    $('sheetInputWrap').style.display = o.input ? 'block' : 'none';
+    if(o.input){
+      inp.value = o.input.value || '';
+      inp.placeholder = o.input.placeholder || '';
+      inp.setAttribute('inputmode', o.input.numeric ? 'decimal' : 'text');
+      inp.style.textAlign = o.input.numeric ? 'left' : 'center';
+      const suf = $('sheetSuffix');
+      suf.textContent = o.input.suffix || '';
+      suf.style.display = o.input.suffix ? 'block' : 'none';
+    }
     const ta = $('sheetArea');
     ta.style.display = o.area ? 'block' : 'none';
     if(o.area){ ta.value = o.area.value || ''; ta.placeholder = o.area.placeholder || ''; ta.readOnly = !!o.area.readOnly; }
@@ -444,7 +551,7 @@ function closeSheet(value){
 $('scrim').onclick = () => closeSheet(null);
 $('sheetCancel').onclick = () => closeSheet(null);
 $('sheetOk').onclick = () => {
-  if($('sheetInput').style.display !== 'none') return closeSheet($('sheetInput').value);
+  if($('sheetInputWrap').style.display !== 'none') return closeSheet($('sheetInput').value);
   if($('sheetArea').style.display !== 'none') return closeSheet($('sheetArea').value);
   closeSheet(true);
 };
@@ -481,10 +588,15 @@ const curSeg = () => S.active ? S.active.segments[S.active.segments.length-1] : 
 const curSide = () => { const g = curSeg(); return g ? g.side : null; };
 const sumSegs = (segs, now) => segs.reduce((s,g) => s + ((g.end || now) - g.start), 0);
 
+function setFeedDest(dest){
+  if(S.active){ S.active.dest = dest; }   // mid-session: retag this session
+  else { S.feedDest = dest; }             // idle: set the default for the next one
+  save(); render();
+}
 function startFeed(side){
   const now = Date.now();
   if(!S.active){
-    S.active = { segments:[{ side, start: now }], paused:false };
+    S.active = { segments:[{ side, start: now }], paused:false, dest: S.feedDest };
   } else if(S.active.paused){
     S.active.segments.push({ side, start: now });
     S.active.paused = false;
@@ -508,17 +620,39 @@ function resumeFeed(){
   S.active.paused = false;
   save(); render();
 }
-function finishFeed(){
+async function finishFeed(){
   if(!S.active) return;
   const g = curSeg();
   if(!g.end) g.end = Date.now();
   const segs = S.active.segments.filter(s => s.end - s.start >= 3000);
+  const dest = S.active.dest || 'baby';
   S.active = null;
-  if(segs.length){
-    S.events.push({ id:uid(), kind:'feed', segments:segs, start:segs[0].start, end:segs[segs.length-1].end });
-    save(); render();
-    flash('Feed saved · ' + ago(sumSegs(segs)));
-  } else { save(); render(); }
+  S.feedDest = 'baby';                    // toggle always resets to Baby after a session
+  if(!segs.length){ save(); render(); return; }
+
+  const ev = { id:uid(), kind:'feed', segments:segs, start:segs[0].start, end:segs[segs.length-1].end, dest };
+  S.events.push(ev);
+  save(); render();
+  flash((dest==='storage'?'Pumped · ':'Feed saved · ') + ago(sumSegs(segs)));
+
+  // storage/pumping: offer to record the volume, but the feed is already saved
+  if(dest === 'storage'){
+    const v = await openSheet({
+      icon:'bottle', tint:'--bottle', soft:'--bottle-soft',
+      title:'How much did you pump?',
+      sub:'Optional — skip if you\u2019d rather not.',
+      input:{ value:'', placeholder:'e.g. 30', suffix:'ml', numeric:true },
+      ok:'Save', cancel:'Skip'
+    });
+    if(v !== null){
+      const ml = parseFloat(String(v).replace(/[^0-9.]/g,''));
+      if(!isNaN(ml) && ml > 0){
+        ev.ml = Math.round(ml);
+        save(); render();
+        flash('Pumped ' + ev.ml + ' ml');
+      }
+    }
+  }
 }
 
 /* ===== nappy ===== */
@@ -542,6 +676,37 @@ async function askNappy(what){
   S.events.push(ev);
   save(); render();
   flash(n.name + ' nappy · ' + clock(ts), () => remove(ev.id));
+}
+async function askFood(){
+  const ts = Date.now();
+  const what = await openSheet({
+    icon:'food', tint:'--food', soft:'--food-soft',
+    title:'Log food',
+    sub: clock(ts) + ' · ' + dayName(ts).toLowerCase(),
+    input:{ value:'', placeholder:'What did they eat? (optional)' },
+    ok:'Log it'
+  });
+  if(what === null) return;
+  const ev = { id:uid(), kind:'food', ts };
+  const w = what.trim(); if(w) ev.what = w.slice(0,60);
+  S.events.push(ev);
+  save(); render();
+  flash('Food · ' + clock(ts), () => remove(ev.id));
+}
+async function noteFeed(id){
+  const e = S.events.find(x => x.id === id);
+  if(!e || e.kind !== 'feed') return;
+  const txt = await openSheet({
+    icon:'note', tint:FEED[e.segments[0].side].v, soft:FEED[e.segments[0].side].soft,
+    title: e.note ? 'Edit note' : 'Add a note',
+    sub: feedTitle(e.segments) + ' · ' + ago(sumSegs(e.segments)),
+    area:{ value: e.note || '', placeholder:'Anything worth remembering about this feed' },
+    ok:'Save'
+  });
+  if(txt === null) return;
+  const t = txt.trim();
+  if(t) e.note = t.slice(0,280); else delete e.note;
+  save(); render();
 }
 $('cam').addEventListener('change', async function(){
   const file = this.files && this.files[0];
@@ -598,6 +763,119 @@ async function deleteViewedPhoto(){
   save(); render();
 }
 
+/* ===== feed history: a scrollable day/night timeline, one column per day,
+   one dot per session, positioned by time of day. Top half = daytime (6am–6pm),
+   bottom half = night (6pm–6am). ===== */
+let chartDays = 7;
+function openChart(){
+  $('chartview').classList.add('up');
+  drawChart();
+  // start scrolled to the newest day (far right)
+  requestAnimationFrame(() => { const t = $('chTrack'); if(t) t.scrollLeft = t.scrollWidth; });
+}
+function closeChart(){ $('chartview').classList.remove('up'); }
+function setChartRange(d){
+  chartDays = d;
+  document.querySelectorAll('#chRange button').forEach(b => b.classList.toggle('on', +b.dataset.d === d));
+  drawChart();
+  requestAnimationFrame(() => { const t = $('chTrack'); if(t) t.scrollLeft = t.scrollWidth; });
+}
+// each session (feed, nappy, food) → { ts, colour, r } placed in its day column
+function chartDayData(nDays){
+  const today0 = startOfDay(Date.now());
+  const days = [];
+  for(let i = nDays-1; i >= 0; i--) days.push({ key: today0 - i*DAY, sessions:[], feeds:0 });
+  const idx = {}; days.forEach((d,i) => idx[d.key] = i);
+  S.events.forEach(e => {
+    const i = idx[startOfDay(at(e))]; if(i === undefined) return;
+    const d = days[i];
+    if(e.kind==='feed'){
+      const side = e.segments[0].side;
+      d.sessions.push({ ts:e.start, colour:'var(' + FEED[side].v + ')', r: e.dest==='storage' ? 3.5 : 5.5, ring: e.dest==='storage' });
+      if(e.dest!=='storage') d.feeds++;
+    } else if(e.kind==='nappy'){
+      const c = e.what==='both' ? 'var(--wet)' : 'var(' + NAPPY[e.what].v + ')';
+      d.sessions.push({ ts:e.ts, colour:c, r:3.5, split: e.what==='both' });
+    } else if(e.kind==='food'){
+      d.sessions.push({ ts:e.ts, colour:'var(--food)', r:4 });
+    }
+  });
+  return days;
+}
+// y-fraction (0=top,1=bottom) for a timestamp: 6:00 at top, 18:00 at middle, 6:00 next at bottom
+function todFraction(ts){
+  const d = new Date(ts);
+  let h = d.getHours() + d.getMinutes()/60;   // 0..24
+  let fromSix = (h - 6 + 24) % 24;            // hours since 6am, 0..24
+  return fromSix / 24;                         // 0 at 6am(top) .. .5 at 6pm(mid) .. 1 at 6am(bottom)
+}
+function drawChart(){
+  const days = chartDayData(chartDays);
+  const totFeeds = days.reduce((s,d)=>s+d.feeds,0);
+  const totSessions = days.reduce((s,d)=>s+d.sessions.length,0);
+  const avgFeeds = (totFeeds/days.length).toFixed(1).replace(/\.0$/,'');
+
+  // running stats
+  let mins=0, ml=0;
+  S.events.forEach(e => {
+    if(e.kind!=='feed') return;
+    const k = startOfDay(e.start);
+    if(k < days[0].key) return;
+    if(e.dest==='storage'){ if(e.ml) ml += e.ml; }
+    else mins += Math.round(sumSegs(e.segments.filter(g=>g.side!=='bottle'))/MIN);
+  });
+  $('chStats').innerHTML = `
+    <div class="cell"><div class="n">${avgFeeds}</div><div class="k">feeds / day</div></div>
+    <div class="cell"><div class="n">${Math.round(mins/days.length)}<i>m</i></div><div class="k">nursing / day</div></div>
+    <div class="cell"><div class="n">${ml ? ml : '—'}${ml?'<i>ml</i>':''}</div><div class="k">pumped</div></div>`;
+
+  // time axis on the left: 6a, 12p, 6p, 12a, 6a — aligned to the plot region only
+  const ticks = [ ['6a',0], ['12p',0.25], ['6p',0.5], ['12a',0.75], ['6a',1] ];
+  $('chAxis').innerHTML =
+    `<div class="axplot">` +
+    ticks.map(([lbl,f]) => `<span class="tl" style="top:${(5 + f*90).toFixed(2)}%">${lbl}</span>`).join('') +
+    `</div><div class="axfoot"></div>`;
+
+  // one column per day; width tuned so ~1 day fills, 7 days are comfy, 28 scroll
+  const colW = chartDays === 1 ? 300 : (chartDays <= 7 ? 66 : (chartDays <= 14 ? 50 : 38));
+  const todayKey = startOfDay(Date.now());
+  let track = '';
+  days.forEach(d => {
+    const isToday = d.key === todayKey;
+    const lbl = isToday ? 'Today'
+      : new Date(d.key).toLocaleDateString([], { weekday:'short' }).slice(0, chartDays>14?1:3);
+    const dm = new Date(d.key).toLocaleDateString([], { day:'numeric', month:'numeric' });
+    let dots = '';
+    d.sessions.forEach(s => {
+      const yf = 5 + todFraction(s.ts) * 90;   // 5%..95% of plot, keeps extremes off the edges
+      const style = s.split
+        ? `left:50%;top:${yf.toFixed(2)}%;width:${s.r*2}px;height:${s.r*2}px;background:linear-gradient(90deg,var(--wet) 0 50%,var(--dirty) 50% 100%)`
+        : `left:50%;top:${yf.toFixed(2)}%;width:${s.r*2}px;height:${s.r*2}px;background:${s.colour}${s.ring?';box-shadow:0 0 0 1.5px var(--card),0 0 0 3px '+s.colour:''}`;
+      dots += `<div class="dot" style="${style}"></div>`;
+    });
+    track += `<div class="chcol${isToday?' today':''}" style="width:${colW}px">
+      <div class="chplot">
+        <div class="daybg"></div><div class="nightbg"></div><div class="noon"></div>
+        ${d.feeds ? `<div class="dcount">${d.feeds}</div>` : ''}
+        ${dots}
+      </div>
+      <div class="dlabel">${lbl}${chartDays<=7?'<br><span style="font-weight:500;opacity:.7">'+dm+'</span>':''}</div>
+    </div>`;
+  });
+  $('chTrack').innerHTML = track;
+
+  $('chLegend').innerHTML = `
+    <span class="chband"><i class="daysw"></i>Day (top)</span>
+    <span class="chband"><i class="nightsw"></i>Night (bottom)</span>
+    <span><i style="background:var(--left)"></i>Left</span>
+    <span><i style="background:var(--right)"></i>Right</span>
+    <span><i style="background:var(--bottle)"></i>Bottle</span>
+    <span><i style="background:var(--wet)"></i>Wet</span>
+    <span><i style="background:var(--dirty)"></i>Dirty</span>
+    <span><i style="background:var(--food)"></i>Food</span>`;
+}
+$('chRange').querySelectorAll('button').forEach(b => b.onclick = () => setChartRange(+b.dataset.d));
+
 /* ===== entries ===== */
 function remove(id){
   const i = S.events.findIndex(e => e.id===id);
@@ -629,8 +907,9 @@ function flash(msg, undo){
 /* ===== editor: fix a past entry, or add one after the fact ===== */
 let edit = null;   // { id, kind } — id null when adding new
 
-const KINDS = { left:FEED.left, right:FEED.right, bottle:FEED.bottle, wet:NAPPY.wet, dirty:NAPPY.dirty, both:NAPPY.both };
+const KINDS = { left:FEED.left, right:FEED.right, bottle:FEED.bottle, wet:NAPPY.wet, dirty:NAPPY.dirty, both:NAPPY.both, food:FOODMETA };
 const isFeedKind = k => k==='left' || k==='right' || k==='bottle';
+const isInstantKind = k => k==='wet' || k==='dirty' || k==='both' || k==='food';
 function dateVal(ts){ const d = new Date(ts); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function timeVal(ts){ const d = new Date(ts); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
 function combine(dateStr, timeStr){
@@ -652,38 +931,95 @@ function setKind(k){
   halo.innerHTML = ICON[isFeedKind(k) ? k : m.icon];
   halo.style.background = 'var(' + m.soft + ')';
   halo.style.color = 'var(' + m.v + ')';
+  // choosing a feed side from the top row seeds/refocuses the segment list
+  if(isFeedKind(k)){
+    if(!edSegs.length) addSeg(k);
+    else { edSegs[0].side = k; renderSegs(); }   // retag the opening segment
+  }
   updateFeedHint();
+}
+
+// working segment list for the feed builder: [{ side, start:'HH:MM', end:'HH:MM' }]
+let edSegs = [];
+function addSeg(side){
+  const now = Date.now();
+  let start, end;
+  if(edSegs.length){
+    const last = edSegs[edSegs.length-1];
+    start = last.end;                       // new segment picks up where the last ended
+    end = timeVal(combine($('edDate').value || dateVal(now), start) + 5*MIN);
+  } else {
+    start = timeVal(now - 10*MIN);
+    end = timeVal(now);
+  }
+  edSegs.push({ side, start, end });
+  // switch the top selector to feed mode without wiping the list
+  if(!isFeedKind(edit.kind)){ edit.kind = side; }
+  document.querySelectorAll('#edKind button').forEach(b => b.className = (b.dataset.k===edit.kind && isFeedKind(edit.kind)) ? 'sel k-'+edit.kind : '');
+  $('edFeed').style.display = 'block';
+  $('edNappy').style.display = 'none';
+  renderSegs();
+  updateFeedHint();
+}
+function removeSeg(i){
+  edSegs.splice(i, 1);
+  if(!edSegs.length){ addSeg('left'); return; }   // never leave zero
+  renderSegs(); updateFeedHint();
+}
+function segChange(i, field, val){
+  edSegs[i][field] = val;
+  updateFeedHint();
+}
+function renderSegs(){
+  const wrap = $('edSegs');
+  wrap.innerHTML = edSegs.map((s, i) => `
+    <div class="segrow">
+      <span class="segdot" style="background:var(${FEED[s.side].v})"></span>
+      <span class="segname">${FEED[s.side].name}</span>
+      <input class="segtime" type="time" value="${s.start}" oninput="segChange(${i},'start',this.value)">
+      <span class="segdash">–</span>
+      <input class="segtime" type="time" value="${s.end}" oninput="segChange(${i},'end',this.value)">
+      ${edSegs.length>1 ? `<button class="segx" onclick="removeSeg(${i})" aria-label="Remove segment">&times;</button>` : '<span class="segx-sp"></span>'}
+    </div>`).join('');
 }
 function updateFeedHint(){
   if(!edit || !isFeedKind(edit.kind)) return;
   const hint = $('edFeedHint');
-  try{
-    const s = combine($('edDate').value, $('edStart').value);
-    const e = combine($('edDate').value, $('edEnd').value);
-    if(e < s){ hint.textContent = 'Ends before it starts — check the times.'; hint.style.color = 'var(--danger)'; }
-    else { hint.textContent = 'Lasts ' + ago(e - s) + '.'; hint.style.color = 'var(--dim)'; }
-  }catch(err){ hint.textContent = ''; }
+  const date = $('edDate').value;
+  if(!date || !edSegs.length){ hint.textContent = ''; return; }
+  let total = 0, bad = false;
+  for(const s of edSegs){
+    const a = combine(date, s.start), b = combine(date, s.end);
+    if(b < a){ bad = true; break; }
+    total += b - a;
+  }
+  if(bad){ hint.textContent = 'A segment ends before it starts — check the times.'; hint.style.color = 'var(--danger)'; }
+  else {
+    const names = [];
+    edSegs.forEach(s => { if(names[names.length-1] !== FEED[s.side].name) names.push(FEED[s.side].name); });
+    hint.textContent = names.join(' → ') + ' · ' + ago(total) + ' total.';
+    hint.style.color = 'var(--dim)';
+  }
 }
-['edDate','edStart','edEnd'].forEach(id => {
-  document.addEventListener('input', ev => { if(ev.target.id === id) updateFeedHint(); });
-});
+document.addEventListener('input', ev => { if(ev.target.id === 'edDate') updateFeedHint(); });
 
 function openEditor(id){
   if(S.active){ flash('Finish the current feed first'); return; }
   const e = id ? S.events.find(x => x.id === id) : null;
   edit = { id: id || null, kind: 'left' };
+  edSegs = [];
   $('edTitle').textContent = id ? 'Edit entry' : 'Add an entry';
   $('edDelete').style.display = id ? 'block' : 'none';
 
   if(e && e.kind === 'feed'){
-    // editing collapses a multi-segment feed to its overall span on one side
-    const side = e.segments[0].side;
     $('edDate').value = dateVal(e.start);
-    $('edStart').value = timeVal(e.start);
-    $('edEnd').value = timeVal(e.end);
-    setKind(side);
-    if(e.segments.length > 1)
-      $('edFeedHint').textContent = 'This was L/R — saving keeps it as one ' + FEED[side].name + ' stretch.';
+    edSegs = e.segments.map(g => ({ side:g.side, start:timeVal(g.start), end:timeVal(g.end) }));
+    edit.kind = e.segments[0].side;
+    setKind(e.segments[0].side);   // shows feed pane; addSeg won't fire since edSegs is filled
+  } else if(e && e.kind === 'food'){
+    $('edNapDate').value = dateVal(e.ts);
+    $('edNapTime').value = timeVal(e.ts);
+    setKind('food');
   } else if(e){
     $('edNapDate').value = dateVal(e.ts);
     $('edNapTime').value = timeVal(e.ts);
@@ -691,11 +1027,9 @@ function openEditor(id){
   } else {
     const now = Date.now();
     $('edDate').value = dateVal(now);
-    $('edStart').value = timeVal(now - 15*MIN);
-    $('edEnd').value = timeVal(now);
     $('edNapDate').value = dateVal(now);
     $('edNapTime').value = timeVal(now);
-    setKind('left');
+    setKind('left');   // seeds one Left segment via addSeg
   }
   $('edScrim').classList.add('up');
   $('editor').classList.add('up');
@@ -703,18 +1037,32 @@ function openEditor(id){
 function closeEditor(){
   $('edScrim').classList.remove('up');
   $('editor').classList.remove('up');
-  edit = null;
+  edit = null; edSegs = [];
 }
 function saveEditor(){
   if(!edit) return;
   const k = edit.kind;
+  const prev = edit.id ? S.events.find(x => x.id === edit.id) : null;
   let ev;
   if(isFeedKind(k)){
-    const start = combine($('edDate').value, $('edStart').value);
-    const end = combine($('edDate').value, $('edEnd').value);
-    if(!$('edDate').value || !$('edStart').value || !$('edEnd').value){ flash('Fill in the date and times'); return; }
-    if(end <= start){ flash('The end time has to be after the start'); return; }
-    ev = { id: edit.id || uid(), kind:'feed', segments:[{ side:k, start, end }], start, end };
+    const date = $('edDate').value;
+    if(!date){ flash('Pick a date'); return; }
+    const segs = [];
+    for(const s of edSegs){
+      if(!s.start || !s.end){ flash('Fill in every segment time'); return; }
+      const start = combine(date, s.start), end = combine(date, s.end);
+      if(end <= start){ flash('Each segment must end after it starts'); return; }
+      segs.push({ side:s.side, start, end });
+    }
+    segs.sort((a,b) => a.start - b.start);
+    ev = { id: edit.id || uid(), kind:'feed', segments:segs, start:segs[0].start, end:segs[segs.length-1].end, dest:(prev && prev.dest) || 'baby' };
+    if(prev && prev.note) ev.note = prev.note;
+    if(prev && prev.ml) ev.ml = prev.ml;
+  } else if(k === 'food'){
+    const ts = combine($('edNapDate').value, $('edNapTime').value);
+    if(!$('edNapDate').value || !$('edNapTime').value){ flash('Fill in the date and time'); return; }
+    ev = { id: edit.id || uid(), kind:'food', ts };
+    if(prev && prev.what) ev.what = prev.what;
   } else {
     const ts = combine($('edNapDate').value, $('edNapTime').value);
     if(!$('edNapDate').value || !$('edNapTime').value){ flash('Fill in the date and time'); return; }
@@ -727,7 +1075,7 @@ function saveEditor(){
     S.events.push(ev);
   }
   closeEditor(); save(); render();
-  flash(edit && edit.id ? 'Entry updated' : 'Entry added');
+  flash(prev ? 'Entry updated' : 'Entry added');
 }
 async function deleteFromEditor(){
   const id = edit.id;
@@ -740,6 +1088,7 @@ $('edCancel').onclick = closeEditor;
 $('edSave').onclick = saveEditor;
 $('edDelete').onclick = deleteFromEditor;
 $('edKind').querySelectorAll('button').forEach(b => b.onclick = () => setKind(b.dataset.k));
+document.querySelectorAll('.segadd button[data-add]').forEach(b => b.onclick = () => addSeg(b.dataset.add));
 
 function toggleDay(key){
   const groups = document.querySelectorAll('.dgroup');
@@ -835,11 +1184,12 @@ function render(){
   if(S.active){
     const total = sumSegs(S.active.segments, now);
     const f = FEED[curSide()];
+    const destLine = (S.active.dest==='storage') ? 'storage / pumping · ' : '';
     h += `<div class="ring">${ringSVG(currentArcs(now))}
       <div class="center${S.active.paused ? '' : ' pulse'}">
         <div class="kicker" style="color:var(${f.v})">${S.active.paused ? 'Paused · '+f.name : f.name}</div>
         <div class="big" id="tick">${stopwatch(total)}</div>
-        <div class="detail">started ${clock(S.active.segments[0].start)}</div>
+        <div class="detail">${destLine}started ${clock(S.active.segments[0].start)}</div>
       </div></div>
       <div class="chips" id="chips">${chips(S.active.segments, now)}</div>
       <div class="controls">
@@ -877,21 +1227,31 @@ function render(){
   };
   const sideBtn = side => `<button class="tap on-${side}${live===side?' live':''}" onclick="startFeed('${side}')">
       <span class="glyph">${ICON[side]}</span>${FEED[side].name}${hint(side)}</button>`;
+  // destination toggle: applies to the running session, or the next one if idle
+  const dest = S.active ? (S.active.dest || 'baby') : S.feedDest;
   h += `<div class="group"><span class="label">${S.active ? 'Switch sides' : 'Start a feed'}</span>
+    <div class="desttoggle">
+      <button class="${dest==='baby'?'on':''}" onclick="setFeedDest('baby')">Baby</button>
+      <button class="${dest==='storage'?'on':''}" onclick="setFeedDest('storage')">Storage / pumping</button>
+    </div>
     <div class="row two">${sideBtn('left')}${sideBtn('right')}</div>
     <div class="row" style="margin-top:10px">
       <button class="tap bottle on-bottle ${live==='bottle'?'live':''}" onclick="startFeed('bottle')">
         <span class="glyph">${ICON.bottle}</span>Bottle</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="tap bottle food-btn" style="color:var(--food)" onclick="askFood()">
+        <span class="glyph">${ICON.food}</span>Food</button>
     </div></div>`;
 
   const napBtn = what => `<button class="tap nap ${what}" onclick="askNappy('${what}')"
-      style="background:var(${NAPPY[what].soft})">
+      style="${what==='both' ? 'background:linear-gradient(105deg,var(--wet-soft) 0 50%,var(--dirty-soft) 50% 100%)' : 'background:var('+NAPPY[what].soft+')'}">
       <span class="glyph">${ICON[NAPPY[what].icon]}</span>${what==='both'?'Both':NAPPY[what].name}</button>`;
   h += `<div class="group"><span class="label">Log a nappy</span>
     <div class="row three">${napBtn('wet')}${napBtn('dirty')}${napBtn('both')}</div></div>`;
 
   const t0 = startOfDay(now);
-  const todayFeeds = feeds.filter(e => e.start >= t0);
+  const todayFeeds = feeds.filter(e => e.start >= t0 && e.dest !== 'storage');
   const mins = Math.round(todayFeeds.reduce((s,e) => s + sumSegs(e.segments.filter(g => g.side!=='bottle')), 0) / MIN);
   const naps = sorted.filter(e => e.kind==='nappy' && e.ts >= t0);
   h += `<div class="today">
@@ -910,7 +1270,12 @@ function render(){
           if(pct >= 0) marks += `<div class="mk feed" style="left:${pct}%;background:var(${FEED[g.side].v})"></div>`;
         });
       } else {
-        marks += `<div class="mk nappy" style="left:${100 - ((now - e.ts)/DAY)*100}%;background:var(${NAPPY[e.what].v})"></div>`;
+        const pct = 100 - ((now - e.ts)/DAY)*100;
+        let bg;
+        if(e.kind==='food') bg = 'var(--food)';
+        else if(e.what==='both') bg = 'linear-gradient(var(--wet) 0 50%,var(--dirty) 50% 100%)';
+        else bg = 'var(' + NAPPY[e.what].v + ')';
+        marks += `<div class="mk nappy" style="left:${pct}%;background:${bg}"></div>`;
       }
     });
     h += `<div class="strip"><div class="bars"><div class="base"></div>${marks}</div>
@@ -931,17 +1296,33 @@ function render(){
     });
 
     const rowHTML = e => {
-      const meta = e.kind==='feed' ? FEED[e.segments[0].side] : NAPPY[e.what];
-      const icon = e.kind==='feed' ? ICON[e.segments[0].side] : ICON[NAPPY[e.what].icon];
-      const title = e.kind==='feed'
-        ? feedTitle(e.segments) + ' · ' + ago(sumSegs(e.segments))
-        : NAPPY[e.what].name + ' nappy';
-      const sub = e.kind==='feed' ? chips(e.segments) : clock(e.ts);
+      let meta, icon, title, sub;
+      if(e.kind==='feed'){
+        meta = FEED[e.segments[0].side];
+        icon = ICON[e.segments[0].side];
+        const badge = e.dest==='storage' ? ` <span class="badge">storage${e.ml ? ' · ' + e.ml + ' ml' : ''}</span>` : '';
+        title = feedTitle(e.segments) + ' · ' + ago(sumSegs(e.segments)) + badge;
+        sub = `<span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">${chips(e.segments)}</span>`;
+        if(e.note) sub += `<span class="note">${esc(e.note)}</span>`;
+      } else if(e.kind==='food'){
+        meta = FOODMETA; icon = ICON.food;
+        title = 'Food';
+        sub = `<span>${e.what ? esc(e.what) + ' · ' : ''}${clock(e.ts)}</span>`;
+      } else {
+        meta = NAPPY[e.what]; icon = ICON[NAPPY[e.what].icon];
+        title = NAPPY[e.what].name + ' nappy';
+        sub = `<span>${clock(e.ts)}</span>`;
+      }
+      const noteBtn = e.kind==='feed'
+        ? `<button class="notebtn${e.note?' has':''}" onclick="event.stopPropagation();noteFeed('${e.id}')" aria-label="${e.note?'Edit note':'Add note'}">${e.note?ICON.note:'+'}</button>`
+        : '';
+      const pipStyle = (e.kind==='nappy' && e.what==='both')
+        ? 'background:linear-gradient(105deg,var(--wet-soft) 0 50%,var(--dirty-soft) 50% 100%)'
+        : `background:var(${meta.soft});color:var(${meta.v})`;
       return `<div class="item" onclick="openEditor('${e.id}')">
-        <div class="pip" style="background:var(${meta.soft});color:var(${meta.v})">${icon}</div>
-        <div class="body"><b>${title}</b>${e.kind==='feed'
-          ? `<span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">${sub}</span>`
-          : `<span>${sub}</span>`}</div>
+        <div class="pip" style="${pipStyle}">${icon}</div>
+        <div class="body"><b>${title}</b>${sub}</div>
+        ${noteBtn}
         ${e.photo ? `<img class="thumb" data-photo="${e.id}" onclick="event.stopPropagation();openPhoto('${e.id}')" alt="Photo">` : ''}
         <button class="x" onclick="event.stopPropagation();remove('${e.id}')" aria-label="Delete entry">&times;</button>
       </div>`;
@@ -949,11 +1330,15 @@ function render(){
 
     // day-header HTML for one day bucket
     const dayHTML = dy => {
-      const f = dy.events.filter(e => e.kind==='feed').length;
+      const f = dy.events.filter(e => e.kind==='feed' && e.dest!=='storage').length;
+      const pump = dy.events.filter(e => e.kind==='feed' && e.dest==='storage').length;
+      const fd = dy.events.filter(e => e.kind==='food').length;
       const wt = dy.events.filter(e => e.kind==='nappy' && e.what!=='dirty').length;
       const dr = dy.events.filter(e => e.kind==='nappy' && e.what!=='wet').length;
       const bits = [];
       if(f) bits.push(f + (f===1?' feed':' feeds'));
+      if(pump) bits.push(pump + ' pumped');
+      if(fd) bits.push(fd + ' food');
       if(wt) bits.push(wt + ' wet');
       if(dr) bits.push(dr + ' dirty');
       const summary = bits.join(' · ') || 'no entries';
@@ -999,10 +1384,13 @@ function render(){
   h += `<div class="addrow"><button class="addbtn" onclick="openEditor()">
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a past entry</button></div>`;
 
+  if(feeds.length) h += `<button class="histbtn" onclick="openChart()">
+    <svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 20v-6M13 20v-10M18 20V8"/></svg>Feed history</button>`;
+
   h += `<button class="sync" id="syncRow" onclick="syncSheet()"></button>
   <div class="tools">
-    <button class="tool" onclick="exportCSV()">Export CSV</button>
-    <button class="tool" onclick="importCSV()">Import CSV</button>
+    <button class="tool" onclick="exportCSV()">Save Data</button>
+    <button class="tool" onclick="importCSV()">Import Data</button>
     <button class="tool" onclick="wipe()">Clear all data</button>
   </div>
   <div class="foot">${linked()
@@ -1027,13 +1415,16 @@ function csvField(v){
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 function buildCSV(){
-  const rows = [['id','seg','date','start','end','type','detail','minutes']];
+  const rows = [['id','seg','date','start','end','type','detail','minutes','dest','note','ml']];
   [...S.events].sort((a,b) => at(a)-at(b)).forEach(e => {
     const date = new Date(at(e)).toLocaleDateString('en-CA'); // YYYY-MM-DD, unambiguous
     if(e.kind==='feed'){
-      e.segments.forEach((g,i) => rows.push([e.id, i, date, isoTime(g.start), isoTime(g.end), 'feed', FEED[g.side].name, Math.round((g.end-g.start)/MIN)]));
+      const dest = e.dest==='storage' ? 'storage' : 'baby';
+      e.segments.forEach((g,i) => rows.push([e.id, i, date, isoTime(g.start), isoTime(g.end), 'feed', FEED[g.side].name, Math.round((g.end-g.start)/MIN), dest, i===0 ? (e.note||'') : '', i===0 && e.ml ? e.ml : '']));
+    } else if(e.kind==='food'){
+      rows.push([e.id, 0, date, isoTime(e.ts), '', 'food', e.what||'', '', '', '', '']);
     } else {
-      rows.push([e.id, 0, date, isoTime(e.ts), '', 'nappy', NAPPY[e.what].name, '']);
+      rows.push([e.id, 0, date, isoTime(e.ts), '', 'nappy', NAPPY[e.what].name, '', '', '', '']);
     }
   });
   return rows.map(r => r.map(csvField).join(',')).join('\r\n');
@@ -1088,7 +1479,7 @@ function parseCSV(text){
   const head = splitCSVLine(lines[0]).map(h => h.trim().toLowerCase());
   const col = name => head.indexOf(name);
   const iId=col('id'), iSeg=col('seg'), iDate=col('date'), iStart=col('start'),
-        iEnd=col('end'), iType=col('type'), iDetail=col('detail');
+        iEnd=col('end'), iType=col('type'), iDetail=col('detail'), iDest=col('dest'), iNote=col('note'), iMl=col('ml');
   if(iDate<0 || iStart<0 || iType<0 || iDetail<0) throw new Error('missing columns');
   const feeds = new Map(), events = [];
   for(let r=1;r<lines.length;r++){
@@ -1102,12 +1493,24 @@ function parseCSV(text){
       const side = FEED_BY_NAME[detail]; if(!side) continue;
       const end = combine(date, (c[iEnd]||'').trim());
       const id = (iId>=0 && c[iId]) ? c[iId].trim() : 'imp' + start;
-      if(!feeds.has(id)){ const ev = { id, kind:'feed', segments:[] }; feeds.set(id, ev); events.push(ev); }
+      if(!feeds.has(id)){
+        const ev = { id, kind:'feed', segments:[], dest:(iDest>=0 && (c[iDest]||'').trim()==='storage') ? 'storage' : 'baby' };
+        const note = iNote>=0 ? (c[iNote]||'').trim() : '';
+        if(note) ev.note = note;
+        const ml = iMl>=0 ? parseFloat((c[iMl]||'').trim()) : NaN;
+        if(!isNaN(ml) && ml > 0) ev.ml = Math.round(ml);
+        feeds.set(id, ev); events.push(ev);
+      }
       feeds.get(id).segments.push({ side, start, end, _seg: iSeg>=0 ? +c[iSeg] : 0 });
     } else if(type === 'nappy'){
       const what = NAPPY_BY_NAME[detail]; if(!what) continue;
       const id = (iId>=0 && c[iId]) ? c[iId].trim() : 'imp' + start;
       events.push({ id, kind:'nappy', what, ts:start });
+    } else if(type === 'food'){
+      const id = (iId>=0 && c[iId]) ? c[iId].trim() : 'imp' + start;
+      const ev = { id, kind:'food', ts:start };
+      if(detail) ev.what = detail;
+      events.push(ev);
     }
   }
   feeds.forEach(f => {
@@ -1291,11 +1694,14 @@ function normalize(){
   if(!Array.isArray(S.deleted)) S.deleted = [];
   if(!S.mtime) S.mtime = Date.now();
   if(S.name === undefined) S.name = '';
+  if(S.feedDest !== 'storage') S.feedDest = 'baby';   // the toggle's resting default
   S.events.forEach(e => {
     if(e.kind==='feed' && !e.segments) e.segments = [{ side:e.side, start:e.start, end:e.end }];
     if(e.kind==='diaper') e.kind = 'nappy';
+    if(e.kind==='feed' && !e.dest) e.dest = 'baby';
   });
   if(S.active && !S.active.segments) S.active = null;
+  if(S.active && !S.active.dest) S.active.dest = 'baby';
 }
 /* The only clock that runs is the one for a feed happening right now, and only
    while the screen is showing it. Everything else is worked out from timestamps
