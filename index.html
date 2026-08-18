@@ -71,6 +71,14 @@
   @keyframes breathe{0%,100%{opacity:1}50%{opacity:.62}}
   .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:18px}
   .chip{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:650;color:var(--dim);background:var(--card2);border-radius:999px;padding:6px 11px}
+  .nextcard{display:flex;align-items:center;gap:12px;background:var(--card);box-shadow:var(--shadow);border-radius:18px;padding:13px 15px;margin-top:16px}
+  .nextcard .nico{width:36px;height:36px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--left-soft);color:var(--left)}
+  .nextcard .nico svg{width:19px;height:19px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .nextcard .ntext{flex:1;min-width:0}
+  .nextcard .nlabel{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:700}
+  .nextcard .nwhen{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:-.01em;margin-top:2px;line-height:1.2}
+  .nextcard .nsmall{font-size:11.5px;color:var(--dim);font-weight:500;margin-top:1px}
+  .nextcard .ntyp{flex:none;font-size:10.5px;font-weight:600;color:var(--dim);text-align:right;line-height:1.25}
   .chip i{width:6px;height:6px;border-radius:50%;flex:none}
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
   .ctl{height:54px;border-radius:18px;font-family:var(--display);font-size:16.5px;font-weight:700;background:var(--card2);transition:transform .1s ease,opacity .1s ease}
@@ -251,6 +259,20 @@
   .inflag .fico svg{width:20px;height:20px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
   .inflag .ft{font-size:13px;font-weight:650;line-height:1.4}
   .inflag .fs{font-size:11.5px;color:var(--dim);margin-top:2px;line-height:1.4}
+  .inmile{display:flex;gap:11px;align-items:center;padding:9px 4px}
+  .inmile+.inmile{border-top:1px solid var(--line)}
+  .inmile.fresh{background:var(--left-soft);border-radius:12px;padding:11px 12px;margin:2px 0}
+  .inmile.fresh+.inmile{border-top:none}
+  .mico{width:26px;height:26px;flex:none}
+  .mico svg{width:26px;height:26px;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .mtitle{font-size:13.5px;font-weight:700;line-height:1.3}
+  .msub{font-size:11.5px;color:var(--dim);margin-top:1px}
+  .intrend{display:grid;grid-template-columns:1fr auto 22px auto;align-items:center;gap:10px;padding:9px 2px}
+  .intrend+.intrend{border-top:1px solid var(--line)}
+  .tlabel{font-size:12.5px;font-weight:600;color:var(--dim)}
+  .tval{font-family:var(--display);font-size:16px;font-weight:700;text-align:right;letter-spacing:-.01em}
+  .tarrow{font-size:16px;font-weight:700;text-align:center}
+  .tprev{font-size:11px;color:var(--dim);text-align:right;white-space:nowrap}
   .inweight{position:relative}
   .inwsvg{width:100%;height:120px;display:block;margin-top:6px}
   .inwadd{width:100%;height:44px;border-radius:14px;background:var(--card2);font-family:var(--display);font-size:14px;font-weight:700;color:var(--text);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -818,6 +840,21 @@ async function deleteViewedPhoto(){
    Windowed to the last `days` days (default 7) except where noted. Nothing here
    is medical advice — these are observations from what you logged. */
 const isDay = ts => { const h = new Date(ts).getHours(); return h >= 6 && h < 18; };  // 6am–6pm = day
+
+// Lightweight next-feed estimate for the main screen: median gap between the last
+// several baby-feed starts, added to the last feed. Returns null if too little data.
+function nextFeedGuess(){
+  const now = Date.now();
+  const baby = S.events.filter(e => e.kind==='feed' && e.dest!=='storage' && e.start<=now).sort((a,b)=>a.start-b.start);
+  if(baby.length < 2) return null;
+  const recent = baby.slice(-8);
+  const gaps = [];
+  for(let i=1;i<recent.length;i++) gaps.push(recent[i].start - recent[i-1].start);
+  const sorted = [...gaps].sort((a,b)=>a-b);
+  const typicalGap = sorted[Math.floor(sorted.length/2)];   // median
+  const last = baby[baby.length-1];
+  return { due: last.start + typicalGap, typicalGap };
+}
 function computeInsights(days){
   const now = Date.now();
   const winStart = startOfDay(now) - (days-1)*DAY;
@@ -893,6 +930,130 @@ function computeInsights(days){
     sinceWet, sinceDirty, wetPerDay,
     cluster
   };
+}
+
+/* ===== richer insights: rhythm, trends, milestones ===== */
+
+// Longest gap between consecutive baby-feed starts where the gap BEGINS on the
+// given calendar day (00:00–24:00). This captures the overnight sleep that starts
+// that evening even though the next feed is the following morning.
+function longestGapForNight(dayStart){
+  const dayEnd = dayStart + DAY;
+  const starts = S.events
+    .filter(e => e.kind==='feed' && e.dest!=='storage')
+    .map(e => e.start).sort((a,b)=>a-b);
+  let longest = 0;
+  for(let i=1;i<starts.length;i++){
+    const prev = starts[i-1];
+    if(prev >= dayStart && prev < dayEnd){        // the gap starts during this day
+      const g = starts[i] - prev;
+      if(g > 0 && g < 18*HR && g > longest) longest = g;   // ignore implausible >18h gaps (missed logging)
+    }
+  }
+  return longest;
+}
+// Longest-sleep trend: one value per "night" (6pm anchor) for the last n nights.
+function sleepTrend(nights){
+  const anchor0 = startOfDay(Date.now());   // today 00:00
+  const out = [];
+  for(let i=nights-1;i>=0;i--){
+    const dayStart = anchor0 - i*DAY;
+    out.push({ key: dayStart, gap: longestGapForNight(dayStart) });
+  }
+  return out;
+}
+
+// Typical-day clock: bin every session by hour-of-day across the window, so we can
+// see when feeds and nappies actually cluster. Returns 24 buckets.
+function typicalDay(days){
+  const now = Date.now();
+  const winStart = startOfDay(now) - (days-1)*DAY;
+  const feedHours = new Array(24).fill(0);
+  const nappyHours = new Array(24).fill(0);
+  let feedDays = new Set();
+  S.events.forEach(e => {
+    const ts = at(e); if(ts < winStart || ts > now) return;
+    const h = new Date(ts).getHours();
+    if(e.kind==='feed' && e.dest!=='storage'){ feedHours[h]++; feedDays.add(startOfDay(ts)); }
+    else if(e.kind==='nappy') nappyHours[h]++;
+  });
+  const nDays = Math.max(1, feedDays.size);
+  return { feedHours, nappyHours, nDays,
+           feedPerHour: feedHours.map(c=>c/nDays) };
+}
+
+// Week-over-week trend: compare the most recent 7 days to the 7 before that.
+function weekTrends(){
+  const now = Date.now();
+  const thisFrom = startOfDay(now) - 6*DAY;      // last 7 days incl today
+  const prevFrom = thisFrom - 7*DAY, prevTo = thisFrom;
+  const segDur = g => Math.max(0, (g.end||g.start) - g.start);
+  const bucket = (from,to) => {
+    const feeds = S.events.filter(e=>e.kind==='feed' && e.dest!=='storage' && e.start>=from && e.start<to);
+    const naps = S.events.filter(e=>e.kind==='nappy' && e.ts>=from && e.ts<to);
+    const nDays = Math.max(1, Math.round((Math.min(to,now)-from)/DAY));
+    const nursing = feeds.reduce((s,f)=>s+f.segments.filter(g=>g.side!=='bottle').reduce((a,g)=>a+segDur(g),0),0);
+    // avg longest sleep across the nights in the bucket
+    let sleeps=[]; for(let d=from; d<to; d+=DAY) sleeps.push(longestGapForNight(d));
+    sleeps = sleeps.filter(x=>x>0);
+    const avgSleep = sleeps.length ? sleeps.reduce((a,b)=>a+b,0)/sleeps.length : 0;
+    return {
+      feedsPerDay: feeds.length/nDays,
+      nursingPerDay: Math.round(nursing/nDays/MIN),
+      wetPerDay: naps.filter(n=>n.what!=='dirty').length/nDays,
+      avgSleep
+    };
+  };
+  const cur = bucket(thisFrom, now+1);
+  const prev = bucket(prevFrom, prevTo);
+  const hasPrev = S.events.some(e => at(e)>=prevFrom && at(e)<prevTo);
+  return { cur, prev, hasPrev };
+}
+
+// Milestones & "on this day" — derived, celebratory, low-stakes.
+function milestones(){
+  const now = Date.now();
+  const babyFeeds = S.events.filter(e=>e.kind==='feed' && e.dest!=='storage' && e.start<=now).sort((a,b)=>a.start-b.start);
+  const out = [];
+  // best sleep ever, and whether it was recent (last 3 days)
+  const trend = sleepTrend(60).filter(d=>d.gap>0 && d.gap<=12*HR);   // exclude logging gaps
+  if(trend.length){
+    const best = trend.reduce((m,d)=>d.gap>m.gap?d:m, trend[0]);
+    const recent = best.key >= startOfDay(now)-2*DAY;
+    out.push({ kind:'sleep', icon:'moon', title:'Longest sleep yet',
+               value: ago(best.gap), sub: recent ? 'set in the last couple of days 🎉' : 'on ' + dayName(best.key),
+               fresh: recent });
+  }
+  // feed count milestones (round numbers)
+  const total = babyFeeds.length;
+  const marks = [50,100,200,300,400,500,750,1000];
+  const lastMark = marks.filter(m=>m<=total).pop();
+  if(lastMark){
+    // was it hit in the last day? (celebratory only if fresh)
+    const hitAt = babyFeeds[lastMark-1] ? babyFeeds[lastMark-1].start : null;
+    out.push({ kind:'count', icon:'spark', title:lastMark+' feeds logged',
+               value:'', sub: total>lastMark ? (total+' and counting') : 'just now 🎉',
+               fresh: hitAt && (now-hitAt)<DAY });
+  }
+  // days tracked
+  const firstEv = [...S.events].sort((a,b)=>at(a)-at(b))[0];
+  if(firstEv){
+    const daysTracked = Math.max(1, Math.round((now - at(firstEv))/DAY));
+    out.push({ kind:'days', icon:'clock', title:daysTracked+(daysTracked===1?' day':' days')+' tracked',
+               value:'', sub:'since '+dayName(at(firstEv)), fresh:false });
+  }
+  return out;
+}
+// "On this day" — feeds/nappies exactly 7 days ago, for a sense of progress.
+function onThisDay(daysBack){
+  const now = Date.now();
+  const target = startOfDay(now) - daysBack*DAY;
+  const feeds = S.events.filter(e=>e.kind==='feed' && e.dest!=='storage' && startOfDay(e.start)===target);
+  const naps = S.events.filter(e=>e.kind==='nappy' && startOfDay(e.ts)===target);
+  if(!feeds.length && !naps.length) return null;
+  const segDur = g => Math.max(0, (g.end||g.start) - g.start);
+  const nursing = Math.round(feeds.reduce((s,f)=>s+f.segments.filter(g=>g.side!=='bottle').reduce((a,g)=>a+segDur(g),0),0)/MIN);
+  return { key:target, feeds:feeds.length, naps:naps.length, nursing };
 }
 
 /* ===== feed history: a scrollable day/night timeline, one column per day,
@@ -1046,6 +1207,18 @@ function drawInsights(){
       <div class="instat"><div class="n">${I.wetPerDay.toFixed(1)}</div><div class="k">wet nappies / day</div></div>
     </div></div>`;
 
+  // --- longest sleep, trended over the window ---
+  const st = sleepTrend(Math.min(insightDays, 28)).filter((d,i,arr)=>true);
+  if(st.some(d=>d.gap>0)){
+    const best = st.reduce((m,d)=>d.gap>m.gap?d:m, st[0]);
+    h += `<div class="incard"><div class="inlabel">Longest sleep · trend</div>
+      <div class="inhero" style="margin-bottom:4px">
+        <div class="ico" style="background:var(--right-soft);color:var(--right)">${ICON.moon}</div>
+        <div><div class="inbig">${ago(best.gap)}</div><div class="insub">best stretch in this window${sleepDirection(st)}</div></div>
+      </div>
+      ${sleepTrendSVG(st)}</div>`;
+  }
+
   // --- left / right balance ---
   if(I.sideTotal){
     const lp = pct(I.left, I.sideTotal), rp = 100-lp;
@@ -1088,10 +1261,137 @@ function drawInsights(){
       <div class="fs">Wet nappies are on track.</div></div></div>`;
   if(flags) h += `<div class="incard"><div class="inlabel">Worth noticing</div>${flags}</div>`;
 
+  // --- milestones (celebratory, fresh ones highlighted) ---
+  const ms = milestones();
+  if(ms.length){
+    h += `<div class="incard"><div class="inlabel">Milestones</div>`;
+    ms.forEach(mi => {
+      h += `<div class="inmile${mi.fresh?' fresh':''}">
+        <div class="mico" style="color:var(--${mi.icon==='moon'?'right':mi.icon==='spark'?'left':'dim'})">${ICON[mi.icon]||ICON.spark}</div>
+        <div class="mtext"><div class="mtitle">${mi.title}${mi.value?' · '+mi.value:''}</div><div class="msub">${mi.sub}</div></div>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  // --- week vs week trends ---
+  const wt = weekTrends();
+  if(wt.hasPrev){
+    const arrow = (cur,prev,goodUp) => {
+      if(Math.abs(cur-prev) < 0.001) return {s:'→', c:'--dim', t:'about the same'};
+      const up = cur>prev;
+      return { s: up?'↑':'↓', c: (up===goodUp)?'--right':'--dim',
+               t: (up?'up':'down')+' from '+prev };
+    };
+    const rows = [
+      ['Feeds / day', wt.cur.feedsPerDay.toFixed(1), wt.prev.feedsPerDay.toFixed(1), wt.cur.feedsPerDay, wt.prev.feedsPerDay, false],
+      ['Nursing / day', wt.cur.nursingPerDay+'m', wt.prev.nursingPerDay+'m', wt.cur.nursingPerDay, wt.prev.nursingPerDay, true],
+      ['Longest sleep', ago(wt.cur.avgSleep), ago(wt.prev.avgSleep), wt.cur.avgSleep, wt.prev.avgSleep, true],
+      ['Wet / day', wt.cur.wetPerDay.toFixed(1), wt.prev.wetPerDay.toFixed(1), wt.cur.wetPerDay, wt.prev.wetPerDay, false]
+    ];
+    h += `<div class="incard"><div class="inlabel">This week vs last week</div>`;
+    rows.forEach(([label,curStr,prevStr,cur,prev,goodUp]) => {
+      const a = arrow(cur,prev,goodUp);
+      h += `<div class="intrend">
+        <div class="tlabel">${label}</div>
+        <div class="tval">${curStr}</div>
+        <div class="tarrow" style="color:var(${a.c})">${a.s}</div>
+        <div class="tprev">was ${prevStr}</div>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  // --- typical day: when feeds cluster across the window ---
+  const td = typicalDay(insightDays);
+  if(td.feedHours.some(c=>c>0)){
+    h += `<div class="incard"><div class="inlabel">A typical day · when feeds happen</div>
+      ${typicalDaySVG(td)}
+      <div class="insub" style="margin-top:8px">${typicalDayNote(td)}</div></div>`;
+  }
+
+  // --- on this day (a week ago) ---
+  const od = onThisDay(7);
+  if(od){
+    h += `<div class="incard"><div class="inlabel">On this day · a week ago</div>
+      <div class="inhero">
+        <div class="ico" style="background:var(--right-soft);color:var(--right)">${ICON.clock}</div>
+        <div><div class="inbig">${od.feeds} feed${od.feeds===1?'':'s'} · ${od.naps} napp${od.naps===1?'y':'ies'}</div>
+          <div class="insub">${dayName(od.key)} · ${od.nursing}m nursing. ${onThisDayNote(od)}</div></div>
+      </div></div>`;
+  }
+
   // --- weight ---
   h += weightCard();
 
   $('inBody').innerHTML = h;
+}
+
+function typicalDaySVG(td){
+  // 24 vertical bars, one per hour, height = feeds/day at that hour. 6am at left.
+  const W=320, H=90, pad=4;
+  const order = []; for(let i=0;i<24;i++) order.push((6+i)%24);   // start at 6am
+  const max = Math.max(0.5, ...td.feedPerHour);
+  const bw = (W-2*pad)/24;
+  let bars = '';
+  order.forEach((hr,idx) => {
+    const v = td.feedPerHour[hr];
+    const bh = (v/max)*(H-18);
+    const x = pad + idx*bw;
+    const day = hr>=6 && hr<18;
+    bars += `<rect x="${(x+0.6).toFixed(1)}" y="${(H-14-bh).toFixed(1)}" width="${(bw-1.2).toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5" fill="var(${day?'--left':'--right'})" opacity="${v>0?0.92:0.15}"/>`;
+  });
+  // hour ticks at 6a,12p,6p,12a
+  const ticks = [[0,'6a'],[6,'12p'],[12,'6p'],[18,'12a']];
+  let labels = '';
+  ticks.forEach(([idx,lbl]) => {
+    const x = pad + idx*bw + bw/2;
+    labels += `<text x="${x.toFixed(1)}" y="${H-2}" text-anchor="middle" font-size="8" fill="var(--dim)" font-family="sans-serif">${lbl}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:90px;display:block;margin-top:8px">${bars}${labels}</svg>`;
+}
+function typicalDayNote(td){
+  // find the busiest 3-hour window
+  let bestStart=0, bestSum=-1;
+  for(let h=0;h<24;h++){
+    let sum=0; for(let k=0;k<3;k++) sum+=td.feedHours[(h+k)%24];
+    if(sum>bestSum){ bestSum=sum; bestStart=h; }
+  }
+  const fmt = h => { const p=h%12===0?12:h%12; return p+(h<12?'am':'pm'); };
+  return `Feeds cluster most around ${fmt(bestStart)}–${fmt((bestStart+3)%24)}. Averaged over the last ${td.nDays} day${td.nDays===1?'':'s'}.`;
+}
+function onThisDayNote(od){
+  const now = computeInsights(1);
+  return 'Today so far: patterns shift fast at this age.';
+}
+function sleepDirection(st){
+  const vals = st.map(d=>d.gap).filter(g=>g>0);
+  if(vals.length<4) return '';
+  const half = Math.floor(vals.length/2);
+  const early = vals.slice(0,half).reduce((a,b)=>a+b,0)/half;
+  const late = vals.slice(half).reduce((a,b)=>a+b,0)/(vals.length-half);
+  if(late > early*1.15) return ' · trending longer 🌙';
+  if(late < early*0.85) return ' · shorter lately';
+  return ' · holding steady';
+}
+function sleepTrendSVG(st){
+  const W=320, H=70, pad=6;
+  const vals = st.map(d=>d.gap);
+  const max = Math.max(4*HR, ...vals);
+  const n = st.length;
+  const bw = (W-2*pad)/n;
+  let bars='';
+  st.forEach((d,i) => {
+    const bh = d.gap>0 ? (d.gap/max)*(H-16) : 0;
+    const x = pad + i*bw;
+    const isToday = d.key === startOfDay(Date.now());
+    bars += `<rect x="${(x+0.8).toFixed(1)}" y="${(H-12-bh).toFixed(1)}" width="${(bw-1.6).toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" rx="2" fill="var(--right)" opacity="${d.gap>0?(isToday?1:0.7):0.12}"/>`;
+  });
+  // hour reference line at a nice round value
+  const refH = Math.round(max/HR/2)*HR;
+  const refY = H-12-(refH/max)*(H-16);
+  const ref = refH>0 ? `<line x1="${pad}" y1="${refY.toFixed(1)}" x2="${W-pad}" y2="${refY.toFixed(1)}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2 3"/><text x="${W-pad}" y="${(refY-3).toFixed(1)}" text-anchor="end" font-size="8" fill="var(--dim)" font-family="sans-serif">${Math.round(refH/HR)}h</text>` : '';
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:70px;display:block;margin-top:6px">${ref}${bars}</svg>`;
 }
 
 function weightCard(){
@@ -1492,13 +1792,30 @@ function render(){
         <button class="ctl primary" onclick="finishFeed()">Finish feed</button>
       </div>`;
   } else if(lastFeed){
+    const guess = nextFeedGuess();
+    let nextCard = '';
+    if(guess){
+      const delta = guess.due - now;
+      let big, small;
+      if(delta < -30*MIN){ big = `around ${clock(guess.due)}`; small = 'may be overdue'; }
+      else if(delta < 10*MIN){ big = 'any time now'; small = `~${clock(guess.due)}`; }
+      else { big = `around ${clock(guess.due)}`; small = `in about ${ago(delta)}`; }
+      nextCard = `<div class="nextcard">
+        <div class="nico">${ICON.clock}</div>
+        <div class="ntext"><div class="nlabel">Next feed</div>
+          <div class="nwhen" id="nextWhen">${big}</div>
+          <div class="nsmall" id="nextSmall">${small}</div></div>
+        <div class="ntyp">every<br>~${ago(guess.typicalGap)}</div>
+      </div>`;
+    }
     h += `<div class="ring">${ringSVG(currentArcs(now))}
       <div class="center">
         <div class="kicker">Since last feed</div>
         <div class="big" id="tick">${ago(now - lastFeed.start)}</div>
         <div class="detail"><b>${feedTitle(lastFeed.segments)}</b> · ${ago(sumSegs(lastFeed.segments))}</div>
       </div></div>
-      <div class="chips">${chips(lastFeed.segments)}</div>`;
+      <div class="chips">${chips(lastFeed.segments)}</div>
+      ${nextCard}`;
   } else {
     h += `<div class="ring">${ringSVG([])}
       <div class="center">
@@ -1574,6 +1891,12 @@ function render(){
     h += `<div class="strip"><div class="bars"><div class="base"></div>${marks}</div>
       <div class="legend"><span>24 hours ago</span><span>now</span></div></div>`;
   }
+
+  if(feeds.length) h += `<button class="inbtn" onclick="openInsights()">
+    <svg viewBox="0 0 24 24"><path d="M4 15l4-5 4 3 4-7 4 5M4 20h16"/></svg>Insights</button>`;
+
+  if(feeds.length) h += `<button class="histbtn" onclick="openChart()">
+    <svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 20v-6M13 20v-10M18 20V8"/></svg>Feed history</button>`;
 
   if(!sorted.length){
     h += `<div class="empty"><b>Nothing logged yet</b>
@@ -1680,12 +2003,6 @@ function render(){
   }
   h += `<div class="addrow"><button class="addbtn" onclick="openEditor()">
     <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a past entry</button></div>`;
-
-  if(feeds.length) h += `<button class="histbtn" onclick="openChart()">
-    <svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 20v-6M13 20v-10M18 20V8"/></svg>Feed history</button>`;
-
-  if(feeds.length) h += `<button class="inbtn" onclick="openInsights()">
-    <svg viewBox="0 0 24 24"><path d="M4 15l4-5 4 3 4-7 4 5M4 20h16"/></svg>Insights</button>`;
 
   h += `<button class="sync" id="syncRow" onclick="syncSheet()"></button>
   <div class="tools">
@@ -2044,6 +2361,16 @@ function refreshElapsed(){          // recompute "since last feed" in place, no 
   const last = S.events.filter(e => e.kind==='feed').sort((a,b) => b.start - a.start)[0];
   const el = $('tick');
   if(el && last) el.textContent = ago(now - last.start);
+  const nw = $('nextWhen'), ns = $('nextSmall');
+  if(nw){
+    const guess = nextFeedGuess();
+    if(guess){
+      const delta = guess.due - now;
+      if(delta < -30*MIN){ nw.textContent = `around ${clock(guess.due)}`; if(ns) ns.textContent = 'may be overdue'; }
+      else if(delta < 10*MIN){ nw.textContent = 'any time now'; if(ns) ns.textContent = `~${clock(guess.due)}`; }
+      else { nw.textContent = `around ${clock(guess.due)}`; if(ns) ns.textContent = `in about ${ago(delta)}`; }
+    }
+  }
   paintRing(now);
 }
 function resume(){                  // back on screen: re-read the clock once
