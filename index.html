@@ -228,6 +228,37 @@
   .chlegend .chband i{border-radius:3px;width:12px;height:9px;border:1px solid var(--line)}
   .chlegend .daysw{background:var(--daytime)}
   .chlegend .nightsw{background:var(--nighttime)}
+  .infoot{margin-top:14px;font-size:10.5px;line-height:1.5;color:var(--dim);text-align:center;padding:0 6px}
+  .incard{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:15px 16px;margin-bottom:11px}
+  .inhero{display:flex;align-items:center;gap:14px}
+  .inhero .ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none}
+  .inhero .ico svg{width:22px;height:22px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .inbig{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .inbig i{font-style:normal;font-size:12px;font-weight:600;color:var(--dim)}
+  .insub{font-size:11.5px;color:var(--dim);font-weight:500;margin-top:2px;line-height:1.35}
+  .inlabel{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:10px}
+  .inbar{height:12px;border-radius:7px;display:flex;overflow:hidden;background:var(--card2)}
+  .inbar span{display:block;height:100%}
+  .inbarlabels{display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px;font-weight:650}
+  .ingrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .instat{background:var(--card2);border-radius:13px;padding:11px 12px}
+  .instat .n{font-family:var(--display);font-size:17px;font-weight:700;letter-spacing:-.01em}
+  .instat .n i{font-style:normal;font-size:11px;color:var(--dim);font-weight:600}
+  .instat .k{font-size:10px;color:var(--dim);font-weight:600;margin-top:2px}
+  .inflag{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:14px;margin-bottom:9px;background:var(--card2)}
+  .inflag.warn{background:var(--food-soft)}
+  .inflag .fico{width:20px;height:20px;flex:none;margin-top:1px}
+  .inflag .fico svg{width:20px;height:20px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .inflag .ft{font-size:13px;font-weight:650;line-height:1.4}
+  .inflag .fs{font-size:11.5px;color:var(--dim);margin-top:2px;line-height:1.4}
+  .inweight{position:relative}
+  .inwsvg{width:100%;height:120px;display:block;margin-top:6px}
+  .inwadd{width:100%;height:44px;border-radius:14px;background:var(--card2);font-family:var(--display);font-size:14px;font-weight:700;color:var(--text);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .inwadd:active{opacity:.8}
+  .inwadd svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  .inbtn{width:100%;margin-top:14px;height:52px;border-radius:17px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:9px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--text)}
+  .inbtn:active{background:var(--card2)}
+  .inbtn svg{width:19px;height:19px;stroke:var(--right);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .viewer{position:fixed;inset:0;background:#0C0A12;display:none;flex-direction:column;z-index:30;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom))}
   .viewer.up{display:flex}
   .viewer img{flex:1;min-height:0;width:100%;object-fit:contain;border-radius:20px}
@@ -370,6 +401,22 @@
   </div>
 </div>
 
+<div class="chartview" id="insightsview" onclick="if(event.target===this)closeInsights()">
+  <div class="chcard">
+    <div class="chhead">
+      <div class="chtitle">Insights</div>
+      <button class="chclose" onclick="closeInsights()" aria-label="Close">&times;</button>
+    </div>
+    <div class="chrange" id="inRange">
+      <button data-d="7" class="on">7 days</button>
+      <button data-d="14">2 weeks</button>
+      <button data-d="28">4 weeks</button>
+    </div>
+    <div id="inBody"></div>
+    <div class="infoot">Observations from what you've logged — not medical advice. If anything worries you, check with your midwife or GP.</div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastAct">Undo</button></div>
 
 <script>
@@ -459,6 +506,9 @@ const ICON = {
   cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19h10.5a3.5 3.5 0 0 0 .4-7A5.5 5.5 0 0 0 7.3 10 4.5 4.5 0 0 0 7 19Z"/><path d="M12 15.5v-5M9.8 12.6 12 10.4l2.2 2.2"/></svg>',
   food:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 2 2v9M8 3v6M4 3v6M18 3c-1.7 0-3 2.2-3 5s1.3 4 3 4v9"/></svg>',
   note:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2 2 0 0 0-3-3L5 17v3Z"/><path d="M13.5 6.5l3 3"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  weight:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21h14a1 1 0 0 0 1-1.1l-1.5-11A1.5 1.5 0 0 0 16 7.5H8A1.5 1.5 0 0 0 6.5 8.9L5 19.9A1 1 0 0 0 5 21Z"/><path d="M9 7.5a3 3 0 0 1 6 0"/><path d="M12 11l2.5 3.5"/></svg>',
+  spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l4-5 4 3 4-7 4 5"/><path d="M4 20h16"/></svg>',
   moon:  '<svg viewBox="0 0 24 24"><path d="M20 14.5A8.2 8.2 0 0 1 9.5 4 8.3 8.3 0 1 0 20 14.5Z"/></svg>',
   sun:   '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2M12 19.6v2M2.4 12h2M19.6 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>'
 };
@@ -763,6 +813,88 @@ async function deleteViewedPhoto(){
   save(); render();
 }
 
+/* ===== insights engine =====
+   Pure-ish computation over the log. Returns everything the insights panel shows.
+   Windowed to the last `days` days (default 7) except where noted. Nothing here
+   is medical advice — these are observations from what you logged. */
+const isDay = ts => { const h = new Date(ts).getHours(); return h >= 6 && h < 18; };  // 6am–6pm = day
+function computeInsights(days){
+  const now = Date.now();
+  const winStart = startOfDay(now) - (days-1)*DAY;
+  const evs = S.events.filter(e => at(e) >= winStart);
+  const feeds = evs.filter(e => e.kind==='feed').sort((a,b)=>a.start-b.start);
+  const babyFeeds = feeds.filter(e => e.dest!=='storage');
+  const nappies = evs.filter(e => e.kind==='nappy').sort((a,b)=>a.ts-b.ts);
+
+  // --- next feed prediction: median gap between the last several baby-feed starts ---
+  const allBaby = S.events.filter(e => e.kind==='feed' && e.dest!=='storage' && e.start<=now).sort((a,b)=>a.start-b.start);
+  const recent = allBaby.slice(-8);
+  const gaps = [];
+  for(let i=1;i<recent.length;i++) gaps.push(recent[i].start - recent[i-1].start);
+  let predict = null, typicalGap = null;
+  if(gaps.length){
+    const sorted = [...gaps].sort((a,b)=>a-b);
+    typicalGap = sorted[Math.floor(sorted.length/2)];              // median
+    const last = allBaby[allBaby.length-1];
+    predict = { due: last.start + typicalGap, lastStart: last.start };
+  }
+
+  // --- longest gap between feed starts, per day (proxy for longest sleep) ---
+  // find the biggest overnight gap in the window
+  let longestGap = 0, longestGapEnd = null;
+  const starts = babyFeeds.map(f=>f.start);
+  for(let i=1;i<starts.length;i++){
+    const g = starts[i]-starts[i-1];
+    if(g > longestGap){ longestGap = g; longestGapEnd = starts[i]; }
+  }
+
+  // --- left/right balance (count of segments on each breast; bottles excluded) ---
+  let left=0, right=0;
+  babyFeeds.forEach(f => f.segments.forEach(s => {
+    if(s.side==='left') left++; else if(s.side==='right') right++;
+  }));
+  const sideTotal = left + right;
+
+  // --- day vs night feed split (by count of baby feeds) ---
+  let dayFeeds=0, nightFeeds=0;
+  babyFeeds.forEach(f => isDay(f.start) ? dayFeeds++ : nightFeeds++);
+
+  // --- averages ---
+  const feedsPerDay = babyFeeds.length / days;
+  const segDur = g => Math.max(0, (g.end||g.start) - g.start);   // never negative
+  const nursingMin = Math.round(babyFeeds.reduce((s,f)=>s + f.segments.filter(g=>g.side!=='bottle').reduce((a,g)=>a+segDur(g),0),0)/MIN);
+  const pumpedMl = feeds.filter(f=>f.dest==='storage').reduce((s,f)=>s+(f.ml||0),0);
+
+  // --- nappy safety flags (observations only) ---
+  const lastWet = [...S.events].filter(e=>e.kind==='nappy' && e.what!=='dirty' && e.ts<=now).sort((a,b)=>b.ts-a.ts)[0];
+  const lastDirty = [...S.events].filter(e=>e.kind==='nappy' && e.what!=='wet' && e.ts<=now).sort((a,b)=>b.ts-a.ts)[0];
+  const sinceWet = lastWet ? now - lastWet.ts : null;
+  const sinceDirty = lastDirty ? now - lastDirty.ts : null;
+  // wet nappies per day over the window (hydration proxy)
+  const wetCount = nappies.filter(n=>n.what!=='dirty').length;
+  const wetPerDay = wetCount / days;
+
+  // --- cluster feed detection: 3+ baby feeds within any 2h rolling window today ---
+  const todayStart = startOfDay(now);
+  const todayFeeds = babyFeeds.filter(f=>f.start>=todayStart).map(f=>f.start);
+  let cluster = false;
+  for(let i=0;i<todayFeeds.length;i++){
+    const within = todayFeeds.filter(t => t>=todayFeeds[i] && t < todayFeeds[i]+2*HR).length;
+    if(within>=3){ cluster = true; break; }
+  }
+
+  return {
+    days, now, feedCount: babyFeeds.length,
+    predict, typicalGap,
+    longestGap, longestGapEnd,
+    left, right, sideTotal,
+    dayFeeds, nightFeeds,
+    feedsPerDay, nursingMin, pumpedMl,
+    sinceWet, sinceDirty, wetPerDay,
+    cluster
+  };
+}
+
 /* ===== feed history: a scrollable day/night timeline, one column per day,
    one dot per session, positioned by time of day. Top half = daytime (6am–6pm),
    bottom half = night (6pm–6am). ===== */
@@ -875,6 +1007,166 @@ function drawChart(){
     <span><i style="background:var(--food)"></i>Food</span>`;
 }
 $('chRange').querySelectorAll('button').forEach(b => b.onclick = () => setChartRange(+b.dataset.d));
+
+/* ===== insights panel ===== */
+let insightDays = 7;
+function openInsights(){ $('insightsview').classList.add('up'); drawInsights(); }
+function closeInsights(){ $('insightsview').classList.remove('up'); }
+function setInsightRange(d){
+  insightDays = d;
+  document.querySelectorAll('#inRange button').forEach(b => b.classList.toggle('on', +b.dataset.d === d));
+  drawInsights();
+}
+function pct(part, whole){ return whole>0 ? Math.round(part/whole*100) : 0; }
+
+function drawInsights(){
+  const I = computeInsights(insightDays);
+  let h = '';
+
+  // --- next feed prediction ---
+  if(I.predict){
+    const due = I.predict.due, delta = Date.now() - due;
+    let rel;
+    if(Math.abs(delta) < 10*MIN) rel = 'any time now';
+    else if(delta > 0) rel = 'about ' + ago(delta) + ' ago';
+    else rel = 'in about ' + ago(-delta);
+    h += `<div class="incard"><div class="inhero">
+      <div class="ico" style="background:var(--left-soft);color:var(--left)">${ICON.clock}</div>
+      <div><div class="inbig">${clock(due)}</div>
+        <div class="insub">Next feed likely ${rel} · typically every ${ago(I.typicalGap)}</div></div>
+    </div></div>`;
+  }
+
+  // --- longest gap (sleep proxy) + averages grid ---
+  h += `<div class="incard"><div class="inlabel">At a glance · last ${I.days} days</div>
+    <div class="ingrid">
+      <div class="instat"><div class="n">${I.longestGap ? ago(I.longestGap) : '—'}</div><div class="k">longest gap between feeds</div></div>
+      <div class="instat"><div class="n">${I.feedsPerDay.toFixed(1)}</div><div class="k">feeds / day</div></div>
+      <div class="instat"><div class="n">${Math.round(I.nursingMin/I.days)}<i>m</i></div><div class="k">nursing / day</div></div>
+      <div class="instat"><div class="n">${I.wetPerDay.toFixed(1)}</div><div class="k">wet nappies / day</div></div>
+    </div></div>`;
+
+  // --- left / right balance ---
+  if(I.sideTotal){
+    const lp = pct(I.left, I.sideTotal), rp = 100-lp;
+    h += `<div class="incard"><div class="inlabel">Breast balance</div>
+      <div class="inbar">
+        <span style="width:${lp}%;background:var(--left)"></span>
+        <span style="width:${rp}%;background:var(--right)"></span>
+      </div>
+      <div class="inbarlabels"><span style="color:var(--left)">Left ${lp}%</span><span style="color:var(--right)">${rp}% Right</span></div>
+      ${Math.abs(lp-50)>=20 ? `<div class="insub" style="margin-top:8px">Leaning ${lp>rp?'left':'right'} lately — you may want to start more feeds on the ${lp>rp?'right':'left'}.</div>` : ''}
+    </div>`;
+  }
+
+  // --- day vs night split ---
+  const dnTotal = I.dayFeeds + I.nightFeeds;
+  if(dnTotal){
+    const dp = pct(I.dayFeeds, dnTotal), np = 100-dp;
+    h += `<div class="incard"><div class="inlabel">Day vs night feeds</div>
+      <div class="inbar">
+        <span style="width:${dp}%;background:var(--daytime);border-right:1px solid var(--line)"></span>
+        <span style="width:${np}%;background:var(--nighttime)"></span>
+      </div>
+      <div class="inbarlabels"><span>☀ Day ${I.dayFeeds}</span><span>Night ${I.nightFeeds} ☾</span></div>
+    </div>`;
+  }
+
+  // --- flags: cluster feeding + nappy gaps (observations only) ---
+  let flags = '';
+  if(I.cluster) flags += `<div class="inflag">
+    <div class="fico" style="color:var(--left)">${ICON.left}</div>
+    <div><div class="ft">Cluster feeding today</div>
+      <div class="fs">Several feeds bunched close together. It's common in newborns, often in the evening or during growth spurts.</div></div></div>`;
+  if(I.sinceWet != null && I.sinceWet > 6*HR) flags += `<div class="inflag warn">
+    <div class="fico" style="color:var(--food)">${ICON.food||ICON.wet}</div>
+    <div><div class="ft">No wet nappy in ${ago(I.sinceWet)}</div>
+      <div class="fs">Worth keeping an eye on hydration. If it stays dry, a quick word with your midwife or GP never hurts.</div></div></div>`;
+  else if(I.sinceWet != null) flags += `<div class="inflag">
+    <div class="fico" style="color:var(--wet)">${ICON.wet}</div>
+    <div><div class="ft">Last wet nappy ${ago(I.sinceWet)} ago</div>
+      <div class="fs">Wet nappies are on track.</div></div></div>`;
+  if(flags) h += `<div class="incard"><div class="inlabel">Worth noticing</div>${flags}</div>`;
+
+  // --- weight ---
+  h += weightCard();
+
+  $('inBody').innerHTML = h;
+}
+
+function weightCard(){
+  const weights = S.events.filter(e => e.kind==='weight' && e.grams>0).sort((a,b)=>a.ts-b.ts);
+  let inner = '';
+  if(weights.length){
+    const latest = weights[weights.length-1];
+    const first = weights[0];
+    const kg = (latest.grams/1000).toFixed(3).replace(/0$/,'');
+    let change = '';
+    if(weights.length>1){
+      const diff = latest.grams - first.grams;
+      const days = Math.max(1, Math.round((latest.ts-first.ts)/DAY));
+      change = `<div class="insub">${diff>=0?'+':''}${diff} g since first entry · ${diff>=0?'gaining':'down'} ~${Math.round(Math.abs(diff)/days)} g/day</div>`;
+    }
+    inner += `<div class="inhero" style="margin-bottom:4px">
+      <div class="ico" style="background:var(--right-soft);color:var(--right)">${ICON.weight||ICON.right}</div>
+      <div><div class="inbig">${kg} <i>kg</i></div>${change}</div></div>`;
+    inner += weightSVG(weights);
+  } else {
+    inner += `<div class="insub">Track weight at checkups — one number every week or two makes a reassuring line to watch.</div>`;
+  }
+  inner += `<button class="inwadd" onclick="addWeight()">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a weight</button>`;
+  return `<div class="incard inweight"><div class="inlabel">Weight</div>${inner}</div>`;
+}
+function weightSVG(weights){
+  const W=300, H=100, pad=8;
+  const xs = weights.map(w=>w.ts), ys = weights.map(w=>w.grams);
+  const minX=Math.min(...xs), maxX=Math.max(...xs)||minX+1;
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const spanY = (maxY-minY)||1, spanX=(maxX-minX)||1;
+  const x = t => pad + (t-minX)/spanX*(W-2*pad);
+  const y = g => (H-pad) - (g-minY)/spanY*(H-2*pad);
+  let pts = weights.map(w=>`${x(w.ts).toFixed(1)},${y(w.grams).toFixed(1)}`).join(' ');
+  let dots = weights.map(w=>`<circle cx="${x(w.ts).toFixed(1)}" cy="${y(w.grams).toFixed(1)}" r="3" fill="var(--right)"/>`).join('');
+  return `<svg class="inwsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="var(--right)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}</svg>`;
+}
+async function editWeight(id){
+  const e = S.events.find(x => x.id === id);
+  if(!e) return;
+  const v = await openSheet({
+    icon:'weight', tint:'--right', soft:'--right-soft',
+    title:'Edit weight', sub:dayName(e.ts) + ' · ' + clock(e.ts),
+    input:{ value:(e.grams/1000).toString(), placeholder:'e.g. 3.4', suffix:'kg', numeric:true },
+    ok:'Save', cancel:'Cancel'
+  });
+  if(v === null) return;
+  const kg = parseFloat(String(v).replace(/[^0-9.]/g,''));
+  if(isNaN(kg) || kg<=0){ flash('Enter a weight in kg'); return; }
+  e.grams = Math.round(kg*1000);
+  save(); render();
+  if($('insightsview').classList.contains('up')) drawInsights();
+  flash('Weight updated');
+}
+async function addWeight(){
+  const v = await openSheet({
+    icon:'weight', tint:'--right', soft:'--right-soft',
+    title:'Add a weight',
+    sub:'From a checkup or home scale.',
+    input:{ value:'', placeholder:'e.g. 3.4', suffix:'kg', numeric:true },
+    ok:'Save', cancel:'Cancel'
+  });
+  if(v === null) return;
+  const kg = parseFloat(String(v).replace(/[^0-9.]/g,''));
+  if(isNaN(kg) || kg<=0){ flash('Enter a weight in kg'); return; }
+  const grams = Math.round(kg*1000);
+  S.events.push({ id:uid(), kind:'weight', ts:Date.now(), grams });
+  save();
+  drawInsights();
+  flash('Weight saved · ' + kg + ' kg');
+}
+$('inRange').querySelectorAll('button').forEach(b => b.onclick = () => setInsightRange(+b.dataset.d));
 
 /* ===== entries ===== */
 function remove(id){
@@ -1006,6 +1298,7 @@ document.addEventListener('input', ev => { if(ev.target.id === 'edDate') updateF
 function openEditor(id){
   if(S.active){ flash('Finish the current feed first'); return; }
   const e = id ? S.events.find(x => x.id === id) : null;
+  if(e && e.kind === 'weight'){ editWeight(id); return; }
   edit = { id: id || null, kind: 'left' };
   edSegs = [];
   $('edTitle').textContent = id ? 'Edit entry' : 'Add an entry';
@@ -1269,7 +1562,7 @@ function render(){
           const pct = 100 - ((now - g.start)/DAY)*100;
           if(pct >= 0) marks += `<div class="mk feed" style="left:${pct}%;background:var(${FEED[g.side].v})"></div>`;
         });
-      } else {
+      } else if(e.kind==='food' || e.kind==='nappy'){
         const pct = 100 - ((now - e.ts)/DAY)*100;
         let bg;
         if(e.kind==='food') bg = 'var(--food)';
@@ -1308,6 +1601,10 @@ function render(){
         meta = FOODMETA; icon = ICON.food;
         title = 'Food';
         sub = `<span>${e.what ? esc(e.what) + ' · ' : ''}${clock(e.ts)}</span>`;
+      } else if(e.kind==='weight'){
+        meta = { v:'--right', soft:'--right-soft' }; icon = ICON.weight;
+        title = (e.grams/1000).toFixed(3).replace(/0$/,'') + ' kg';
+        sub = `<span>Weight · ${clock(e.ts)}</span>`;
       } else {
         meta = NAPPY[e.what]; icon = ICON[NAPPY[e.what].icon];
         title = NAPPY[e.what].name + ' nappy';
@@ -1387,6 +1684,9 @@ function render(){
   if(feeds.length) h += `<button class="histbtn" onclick="openChart()">
     <svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 20v-6M13 20v-10M18 20V8"/></svg>Feed history</button>`;
 
+  if(feeds.length) h += `<button class="inbtn" onclick="openInsights()">
+    <svg viewBox="0 0 24 24"><path d="M4 15l4-5 4 3 4-7 4 5M4 20h16"/></svg>Insights</button>`;
+
   h += `<button class="sync" id="syncRow" onclick="syncSheet()"></button>
   <div class="tools">
     <button class="tool" onclick="exportCSV()">Save Data</button>
@@ -1415,16 +1715,18 @@ function csvField(v){
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 function buildCSV(){
-  const rows = [['id','seg','date','start','end','type','detail','minutes','dest','note','ml']];
+  const rows = [['id','seg','date','start','end','type','detail','minutes','dest','note','ml','grams']];
   [...S.events].sort((a,b) => at(a)-at(b)).forEach(e => {
     const date = new Date(at(e)).toLocaleDateString('en-CA'); // YYYY-MM-DD, unambiguous
     if(e.kind==='feed'){
       const dest = e.dest==='storage' ? 'storage' : 'baby';
-      e.segments.forEach((g,i) => rows.push([e.id, i, date, isoTime(g.start), isoTime(g.end), 'feed', FEED[g.side].name, Math.round((g.end-g.start)/MIN), dest, i===0 ? (e.note||'') : '', i===0 && e.ml ? e.ml : '']));
+      e.segments.forEach((g,i) => rows.push([e.id, i, date, isoTime(g.start), isoTime(g.end), 'feed', FEED[g.side].name, Math.round((g.end-g.start)/MIN), dest, i===0 ? (e.note||'') : '', i===0 && e.ml ? e.ml : '', '']));
     } else if(e.kind==='food'){
-      rows.push([e.id, 0, date, isoTime(e.ts), '', 'food', e.what||'', '', '', '', '']);
+      rows.push([e.id, 0, date, isoTime(e.ts), '', 'food', e.what||'', '', '', '', '', '']);
+    } else if(e.kind==='weight'){
+      rows.push([e.id, 0, date, isoTime(e.ts), '', 'weight', '', '', '', '', '', e.grams||'']);
     } else {
-      rows.push([e.id, 0, date, isoTime(e.ts), '', 'nappy', NAPPY[e.what].name, '', '', '', '']);
+      rows.push([e.id, 0, date, isoTime(e.ts), '', 'nappy', NAPPY[e.what].name, '', '', '', '', '']);
     }
   });
   return rows.map(r => r.map(csvField).join(',')).join('\r\n');
@@ -1479,7 +1781,7 @@ function parseCSV(text){
   const head = splitCSVLine(lines[0]).map(h => h.trim().toLowerCase());
   const col = name => head.indexOf(name);
   const iId=col('id'), iSeg=col('seg'), iDate=col('date'), iStart=col('start'),
-        iEnd=col('end'), iType=col('type'), iDetail=col('detail'), iDest=col('dest'), iNote=col('note'), iMl=col('ml');
+        iEnd=col('end'), iType=col('type'), iDetail=col('detail'), iDest=col('dest'), iNote=col('note'), iMl=col('ml'), iGrams=col('grams');
   if(iDate<0 || iStart<0 || iType<0 || iDetail<0) throw new Error('missing columns');
   const feeds = new Map(), events = [];
   for(let r=1;r<lines.length;r++){
@@ -1491,7 +1793,8 @@ function parseCSV(text){
     const start = combine(date, (c[iStart]||'').trim());
     if(type === 'feed'){
       const side = FEED_BY_NAME[detail]; if(!side) continue;
-      const end = combine(date, (c[iEnd]||'').trim());
+      let end = combine(date, (c[iEnd]||'').trim());
+      if(end < start) end += DAY;   // feed crossed midnight — end is on the next day
       const id = (iId>=0 && c[iId]) ? c[iId].trim() : 'imp' + start;
       if(!feeds.has(id)){
         const ev = { id, kind:'feed', segments:[], dest:(iDest>=0 && (c[iDest]||'').trim()==='storage') ? 'storage' : 'baby' };
@@ -1511,6 +1814,10 @@ function parseCSV(text){
       const ev = { id, kind:'food', ts:start };
       if(detail) ev.what = detail;
       events.push(ev);
+    } else if(type === 'weight'){
+      const id = (iId>=0 && c[iId]) ? c[iId].trim() : 'imp' + start;
+      const grams = iGrams>=0 ? parseInt((c[iGrams]||'').trim(),10) : NaN;
+      if(!isNaN(grams) && grams>0) events.push({ id, kind:'weight', ts:start, grams });
     }
   }
   feeds.forEach(f => {
@@ -1699,6 +2006,16 @@ function normalize(){
     if(e.kind==='feed' && !e.segments) e.segments = [{ side:e.side, start:e.start, end:e.end }];
     if(e.kind==='diaper') e.kind = 'nappy';
     if(e.kind==='feed' && !e.dest) e.dest = 'baby';
+    // repair segments whose end is before its start (a midnight crossing that was
+    // stored same-day, e.g. from an older CSV import) by rolling the end forward
+    if(e.kind==='feed' && e.segments) e.segments.forEach(g => {
+      if(g.end && g.end < g.start && (g.start - g.end) > 20*HR) g.end += DAY;
+    });
+    if(e.kind==='feed' && e.segments && e.segments.length){
+      e.start = e.segments[0].start;
+      e.end = e.segments[e.segments.length-1].end;
+    }
+    // weight entries: { kind:'weight', ts, grams }
   });
   if(S.active && !S.active.segments) S.active = null;
   if(S.active && !S.active.dest) S.active.dest = 'baby';
