@@ -64,20 +64,20 @@
   .ring circle{fill:none;stroke-linecap:round;transition:stroke-dasharray .9s linear,stroke-dashoffset .9s linear}
   .ring .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px}
   .kicker{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);font-weight:700}
-  .big{font-family:var(--display);font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.05;margin:7px 0 6px;white-space:nowrap}
+  .big{font-family:var(--display);font-size:48px;font-weight:700;letter-spacing:-.03em;line-height:1.05;margin:7px 0 6px;white-space:nowrap}
   .detail{font-size:12px;color:var(--dim);line-height:1.5}
   .detail b{color:var(--text);font-weight:650}
   .pulse{animation:breathe 3.4s ease-in-out infinite}
   @keyframes breathe{0%,100%{opacity:1}50%{opacity:.62}}
   .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:18px}
-  .chip{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:650;color:var(--dim);background:var(--card2);border-radius:999px;padding:6px 11px}
+  .chip{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:650;color:var(--dim);background:var(--card2);border-radius:999px;padding:7px 13px}
   .nextcard{display:flex;align-items:center;gap:12px;background:var(--card);box-shadow:var(--shadow);border-radius:18px;padding:13px 15px;margin-top:16px}
   .nextcard .nico{width:36px;height:36px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--left-soft);color:var(--left)}
   .nextcard .nico svg{width:19px;height:19px;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
   .nextcard .ntext{flex:1;min-width:0}
-  .nextcard .nlabel{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:700}
-  .nextcard .nwhen{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:-.01em;margin-top:2px;line-height:1.2}
-  .nextcard .nsmall{font-size:11.5px;color:var(--dim);font-weight:500;margin-top:1px}
+  .nextcard .nlabel{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:700}
+  .nextcard .nwhen{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:-.01em;margin-top:3px;line-height:1.2}
+  .nextcard .nsmall{font-size:13px;color:var(--dim);font-weight:500;margin-top:2px}
   .nextcard .ntyp{flex:none;font-size:10.5px;font-weight:600;color:var(--dim);text-align:right;line-height:1.25}
   .chip i{width:6px;height:6px;border-radius:50%;flex:none}
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
@@ -93,7 +93,7 @@
   .tap{border-radius:24px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.01em;padding:18px 8px;transition:transform .12s cubic-bezier(.2,.9,.3,1),background .15s ease;position:relative;overflow:hidden}
   .tap:active{transform:scale(.955)}
   .tap small{font-family:var(--body);font-size:10.5px;font-weight:500;color:var(--dim);letter-spacing:.02em;margin-top:-3px}
-  .tap small.upnext{font-weight:800;color:currentColor}
+  .tap small.upnext{font-size:12.5px;font-weight:800;color:currentColor}
   .tap .glyph{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
   .tap .glyph svg{width:100%;height:100%}
   .tap.on-left{background:var(--left-soft);color:var(--left)}
@@ -305,6 +305,8 @@
   .seg button.sel.k-dirty{background:var(--dirty)}
   .seg button.sel.k-both{background:linear-gradient(105deg,var(--wet) 0 50%,var(--dirty) 50% 100%)}
   .seg button.sel.k-food{background:var(--food)}
+  .eddest button{min-width:calc(50% - 6px)}
+  .eddest button.on{background:var(--text);color:var(--bg)}
   #edFeed,#edNappy{display:none}
   #edSegs{display:flex;flex-direction:column;gap:8px;margin-top:6px}
   .segrow{display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:14px;padding:9px 10px}
@@ -370,6 +372,11 @@
   <div id="edFeed">
     <label class="flab">Date</label>
     <input class="field ed" id="edDate" type="date">
+    <label class="flab" style="margin-top:16px">This feed went to</label>
+    <div class="seg eddest" id="edDest">
+      <button type="button" data-dest="baby">Baby</button>
+      <button type="button" data-dest="storage">Storage (pumped)</button>
+    </div>
     <label class="flab" style="margin-top:16px">Feed segments</label>
     <div id="edSegs"></div>
     <div class="segadd">
@@ -1608,7 +1615,9 @@ function openEditor(id){
     $('edDate').value = dateVal(e.start);
     edSegs = e.segments.map(g => ({ side:g.side, start:timeVal(g.start), end:timeVal(g.end) }));
     edit.kind = e.segments[0].side;
+    edit.dest = e.dest === 'storage' ? 'storage' : 'baby';
     setKind(e.segments[0].side);   // shows feed pane; addSeg won't fire since edSegs is filled
+    setEdDest(edit.dest);
   } else if(e && e.kind === 'food'){
     $('edNapDate').value = dateVal(e.ts);
     $('edNapTime').value = timeVal(e.ts);
@@ -1622,7 +1631,9 @@ function openEditor(id){
     $('edDate').value = dateVal(now);
     $('edNapDate').value = dateVal(now);
     $('edNapTime').value = timeVal(now);
+    edit.dest = 'baby';
     setKind('left');   // seeds one Left segment via addSeg
+    setEdDest('baby');
   }
   $('edScrim').classList.add('up');
   $('editor').classList.add('up');
@@ -1648,9 +1659,9 @@ function saveEditor(){
       segs.push({ side:s.side, start, end });
     }
     segs.sort((a,b) => a.start - b.start);
-    ev = { id: edit.id || uid(), kind:'feed', segments:segs, start:segs[0].start, end:segs[segs.length-1].end, dest:(prev && prev.dest) || 'baby' };
+    ev = { id: edit.id || uid(), kind:'feed', segments:segs, start:segs[0].start, end:segs[segs.length-1].end, dest: edit.dest === 'storage' ? 'storage' : 'baby' };
     if(prev && prev.note) ev.note = prev.note;
-    if(prev && prev.ml) ev.ml = prev.ml;
+    if(prev && prev.ml && ev.dest === 'storage') ev.ml = prev.ml;   // keep ml only if still storage
   } else if(k === 'food'){
     const ts = combine($('edNapDate').value, $('edNapTime').value);
     if(!$('edNapDate').value || !$('edNapTime').value){ flash('Fill in the date and time'); return; }
@@ -1681,6 +1692,11 @@ $('edCancel').onclick = closeEditor;
 $('edSave').onclick = saveEditor;
 $('edDelete').onclick = deleteFromEditor;
 $('edKind').querySelectorAll('button').forEach(b => b.onclick = () => setKind(b.dataset.k));
+document.querySelectorAll('#edDest button[data-dest]').forEach(b => b.onclick = () => setEdDest(b.dataset.dest));
+function setEdDest(dest){
+  if(edit) edit.dest = dest;
+  document.querySelectorAll('#edDest button').forEach(b => b.classList.toggle('on', b.dataset.dest === dest));
+}
 document.querySelectorAll('.segadd button[data-add]').forEach(b => b.onclick = () => addSeg(b.dataset.add));
 
 function toggleDay(key){
@@ -1955,8 +1971,14 @@ function render(){
       const fd = dy.events.filter(e => e.kind==='food').length;
       const wt = dy.events.filter(e => e.kind==='nappy' && e.what!=='dirty').length;
       const dr = dy.events.filter(e => e.kind==='nappy' && e.what!=='wet').length;
+      // total nursing time that day (breast only, clamped so bad data can't go negative)
+      const segD = g => Math.max(0, (g.end||g.start) - g.start);
+      const nurseMs = dy.events.filter(e => e.kind==='feed' && e.dest!=='storage')
+        .reduce((s,e) => s + e.segments.filter(g=>g.side!=='bottle').reduce((a,g)=>a+segD(g),0), 0);
+      const nurseMin = Math.round(nurseMs/MIN);
       const bits = [];
       if(f) bits.push(f + (f===1?' feed':' feeds'));
+      if(nurseMin) bits.push(ago(nurseMs) + ' nursing');
       if(pump) bits.push(pump + ' pumped');
       if(fd) bits.push(fd + ' food');
       if(wt) bits.push(wt + ' wet');
